@@ -1,0 +1,335 @@
+swagger: '2.0'
+info:
+  version: 3.0.0
+  title: ESG Administration API
+  description: The ESG administration API enables allowed consumers to created, read, update and delete API policies on ESGs
+  contact:
+    name: ESG Competency Center
+    email: integration.platform@axa-tech.com
+host: api-gateway-1733911116.eu-central-1.elb.amazonaws.com
+schemes:
+  - https
+basePath: /esg-administration/v3
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  '/apis':
+    post:
+      operationId: post-apis
+      description: Create a new API with one or more policies on the tenant's ESG
+      parameters:
+        - name: api
+          in: body
+          description: 'API to be published'
+          required: true
+          schema:
+            $ref: '#/definitions/Api'
+      tags:
+        - apis
+      responses:
+        '201':
+          description: API has been created
+          schema:
+            $ref: '#/definitions/Api'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+    
+    get:
+      operationId: get-apis
+      description: Read all APIs for the tenant's ESG
+      tags:
+        - apis
+      responses:
+        '200':
+          description: API list is delivered
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Api'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+
+  '/apis/{api-id}/policy-templates':
+    post:
+      operationId: post-policy-templates
+      description: Add a new policy to an existing API
+      parameters:
+        - name: api-id
+          in: path
+          description: 'API to be extended by a new policy'
+          required: true
+          type: string
+        - name: policy-template
+          in: body
+          description: 'Policy to be added'
+          required: true
+          schema:
+            $ref: '#/definitions/PolicyTemplate'
+      tags:
+        - policy-templates
+        - apis
+      responses:
+        '201':
+          description: API policy has been added
+          schema:
+            $ref: '#/definitions/PolicyTemplate'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+
+definitions: 
+  Api: 
+    type: object
+    required:
+      - api-id
+      - swagger-validation-required
+      - policy-template
+      - provider-hostname
+      - provider-basepath
+    properties:
+      api-id:
+        type: string
+      swagger:
+        type: object
+      swagger-validation-required:
+        type: boolean
+      policy-template:
+        $ref: '#/definitions/PolicyTemplate'
+      provider-hostname:
+        type: string
+      provider-basepath:
+        type: string
+
+  Portal:
+    type: object
+    required: 
+      - eula-id
+      - access-status
+      - portal-status
+    properties: 
+      eula-id:
+        type: string
+      access-status:
+        type: string
+        enum:
+          - private
+          - public
+      portal-status:
+        type: string
+        enum:
+          - enabled
+          - disabled
+          - deprecated
+          
+  HttpResponseHeader:
+    type: object
+    required: 
+      - name
+      - value
+    properties: 
+      name:
+        type: string
+      value:
+        type: string
+        
+  PolicyTemplate:
+    type: object
+    required: 
+      - policy-template-id
+    properties: 
+      policy-template-id:
+        description: bla
+        type: string
+        enum:
+          - uuid1
+          - uuid2
+      policy-template-1:
+        $ref: '#/definitions/PolicyTemplate1'
+      policy-template-2:
+        $ref: '#/definitions/PolicyTemplate2'     
+      
+  PolicyTemplate1:
+    type: object
+    required: 
+      - publish-on-portal
+      - authorization-required
+      - rate-limit
+      - max-request-size
+      - malware-scanning-multipart-messages
+    properties: 
+      publish-on-portal:
+        type: boolean
+      portal:
+        $ref: '#/definitions/Portal'
+      authorization-required:
+        type: boolean
+      rate-limit:
+        type: integer
+        description: Max number of calls pro second
+      max-request-size:
+        type: integer
+        description: In KBytes
+      malware-scanning-content-types:
+        type: array
+        items:
+          type: string
+      malware-scanning-multipart-messages:
+        type: boolean
+      http-response-headers:
+        type: array
+        items:
+          $ref: '#/definitions/HttpResponseHeader'
+      oauth:
+        $ref: '#/definitions/Oauth'
+      cors:
+        $ref: '#/definitions/Cors'
+      sign-x-axa-context-header:
+        type: boolean
+      cache-x-axa-context-header-seconds:
+        type: integer
+        
+  PolicyTemplate2:
+    type: object
+    required: 
+      - policy-template-type
+      - something-bubu
+    properties: 
+      policy-template-type:
+        description: Could be only 'template2'
+        type: string
+        enum:
+          - template2
+      something-bubu:
+        type: string
+  
+  Scope:
+    type: object
+    required:
+      - name
+      - authentication-level    
+    properties:
+      name:
+        type: string
+      authentication-level:
+        type: string
+  
+  AuthenticationLevelConfiguration:
+    type: object
+    required:
+      - authentication-level
+      - grant-type
+      - at-exp
+      - rt-exp
+    properties:
+      authentication-level:
+        type: string
+      grant-type:
+        type: string
+        enum:
+          - authorization
+          - password
+          - implicit
+          - client
+      at-exp:
+        type: integer
+      rt-exp:
+        type: integer
+      password-provider-type:
+        type: string
+        description: Only needed for grant type 'password'
+        enum:
+          - b2c_repository
+          - gir_repository
+          - soap
+          - rest
+      password-b2c-scope:
+        type: string
+        description: >-
+          Only needed for grant type 'password' and password provider
+          type is 'b2c_repository'
+      password-provider-url:
+        type: string
+        description: >-
+          Only needed for grant type 'password' and password provider
+          type is 'rest' or 'soap'
+      authorization-saml-request-type:
+        type: string
+        description: Only needed for grant type 'authorization'
+        enum:
+          - saml-post
+          - saml-redirect
+      authorization-saml-request-issuer:
+        type: string
+        description: Only needed for grant type 'authorization'
+      authorization-idp-url:
+        type: string
+        description: Only needed for grant type 'authorization'  
+  
+  Oauth:
+    type: object
+    required:
+      - scope
+      - authentication-level-configuration
+    properties:
+      scope:
+        type: array
+        items:
+          $ref: '#/definitions/Scope'
+      authentication-level-configuration:
+        type: array
+        items:
+          $ref: '#/definitions/AuthenticationLevelConfiguration'
+          
+  Cors:
+    type: object
+    required:
+      - allowed-origins
+      - allow-credentials
+      - simple-exposed-headers
+      - preflight-rate-limit
+      - preflight-allowed-methods
+      - preflight-allowed-headers
+      - preflight-max-age
+    properties:
+      allowed-origins:
+        type: array
+        items:
+          type: string
+      allow-credentials:
+        type: boolean
+      simple-exposed-headers:
+        type: array
+        items:
+          type: string
+      preflight-rate-limit:
+        type: integer
+      preflight-allowed-methods:
+        type: array
+        items:
+          type: string
+      preflight-allowed-headers:
+        type: array
+        items:
+          type: string
+      preflight-max-age:
+        type: integer 
+
+  ErrorResponse: 
+    type: object
+    required:
+      - error
+      - detail
+    properties:
+      error: 
+        type: string
+      detail:
+        type: string
