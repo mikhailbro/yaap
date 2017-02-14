@@ -11,4 +11,14 @@ Design and (eventually) implementation
 * API Design
 * Role model and permissions
 * Security How To (Access Tokens, Roles, etc.)
-* Webhooks!
+* Webhooks
+* 
+
+
+
+
+MONGODB in C9:
+-   installation: sudo apt-get install -y mongodb-org
+-   start: mongod --bind_ip=$IP --nojournal. 
+    Now you can open the mongo shell in a new Terminal, running following command:
+    mongo
