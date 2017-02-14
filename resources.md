@@ -1,6 +1,6 @@
 # API
-- id
-- name
+- ~~id~~
+- ~~name~~
 - audience (public, array of tenants) => needed for authorization / visibility of APIs, etc.
 - swagger (version, hostname, basepath, contac, etc.)
 - state (enabled, disabled, deprecated)
