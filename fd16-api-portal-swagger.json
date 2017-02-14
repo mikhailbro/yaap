@@ -1,0 +1,1011 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "API-Portal",
+        "description": "FocusDays16 - API of the API Portal",
+        "version": "1.0.0"
+    },
+    "host": "api.aaa.ch",
+    "schemes": [
+        "https"
+    ],
+    "basePath": "/rest/api-portal/v1",
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "paths": {
+        "/tenants/{tenant-id}/apis/{api-uri}/api-consumers": {
+            "get": {
+                "summary": "Collection of API consumers",
+                "operationId": "get-api-consumers",
+                "description": "Collection of existing API consumers of an API.\n",
+                "parameters": [
+                    {
+                        "name": "email",
+                        "in": "header",
+                        "description": "Mail address of the user, unique within a tenant.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "tenant-id",
+                        "in": "path",
+                        "description": "Unique identifier of the tenant.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "api-uri",
+                        "in": "path",
+                        "description": "Unique identifier representing a specific API.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "appl-id",
+                        "in": "query",
+                        "description": "Application ID.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "endpoint-url",
+                        "in": "query",
+                        "description": "API consumer endpoint on their side.",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "api-consumers"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "An array of API consumers",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ApiConsumer"
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "Unexpected error.",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Post a new consumer of an API",
+                "operationId": "post-api-consumer",
+                "description": "Post a brand new consumer of a concrete API within a concrete tenant context.\n",
+                "parameters": [
+                    {
+                        "name": "email",
+                        "in": "header",
+                        "description": "Mail address of the user, unique within a tenant.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "tenant-id",
+                        "in": "path",
+                        "description": "Unique identifier of the tenant.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "api-uri",
+                        "in": "path",
+                        "description": "Unique identifier representing a specific API.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "api-consumer",
+                        "in": "body",
+                        "description": "API consumer to be delivered.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ApiConsumer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "apis"
+                ],
+                "responses": {
+                    "201": {
+                        "description": "An new API consumer was successfully saved.",
+                        "schema": {
+                            "$ref": "#/definitions/ApiConsumer"
+                        }
+                    },
+                    "default": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/tenants/{tenant-id}/apis/{api-uri}/api-consumers/{consumer-id}": {
+            "get": {
+                "summary": "An API consumer",
+                "operationId": "get-api-consumer",
+                "description": "An existing consumer of a concrete API within a concrete tenant context.\n",
+                "parameters": [
+                    {
+                        "name": "email",
+                        "in": "header",
+                        "description": "Mail address of the user, unique within a tenant.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "tenant-id",
+                        "in": "path",
+                        "description": "Unique identifier of the tenant.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "api-uri",
+                        "in": "path",
+                        "description": "Unique identifier representing a specific API.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "consumer-id",
+                        "in": "path",
+                        "description": "Unique identifier representing a specific API consumer.",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "api-consumers"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "An selected API consumers",
+                        "schema": {
+                            "$ref": "#/definitions/ApiConsumer"
+                        }
+                    },
+                    "404": {
+                        "description": "API consumer not found.",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "default": {
+                        "description": "Unexpected error.",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Update an existing API consumer",
+                "operationId": "put-api-consumer",
+                "description": "Update an existing consumer of a concrete API within a concrete tenant context.\n",
+                "parameters": [
+                    {
+                        "name": "email",
+                        "in": "header",
+                        "description": "Mail address of the user, unique within a tenant.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "tenant-id",
+                        "in": "path",
+                        "description": "Unique identifier of the tenant.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "api-uri",
+                        "in": "path",
+                        "description": "Unique identifier representing a specific API.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "consumer-id",
+                        "in": "path",
+                        "description": "Unique identifier representing a specific API consumer.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "api-consumer",
+                        "in": "body",
+                        "description": "API consumer to be delivered.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ApiConsumer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "api-consumers"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "API consumer was successfully updated.",
+                        "schema": {
+                            "$ref": "#/definitions/ApiConsumer"
+                        }
+                    },
+                    "404": {
+                        "description": "API consumer not found.",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "default": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete an existing API consumer",
+                "operationId": "delete-api-consumer",
+                "description": "Delete an existing consumer of a concrete API within a concrete tenant context.\n",
+                "parameters": [
+                    {
+                        "name": "email",
+                        "in": "header",
+                        "description": "Mail address of the user, unique within a tenant.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "tenant-id",
+                        "in": "path",
+                        "description": "Unique identifier of the tenant.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "api-uri",
+                        "in": "path",
+                        "description": "Unique identifier representing a specific API.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "consumer-id",
+                        "in": "path",
+                        "description": "Unique identifier representing a specific API consumer.",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "api-consumers"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "API consumer was successfully deleted."
+                    },
+                    "404": {
+                        "description": "API consumer not found.",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "default": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/tenants/{tenant-id}/apis": {
+            "get": {
+                "summary": "APIs, visible for an authorized and registered user",
+                "operationId": "get-apis",
+                "description": "Collections of APIs, which are visible in the API Portal for an\nauthorized and registered user. \n\nFor each API from this collection an API consumer can be registered in\nthe API Portal by authorized and registered user.\n",
+                "parameters": [
+                    {
+                        "name": "email",
+                        "in": "header",
+                        "description": "Mail address of the user, unique within a tenant.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "tenant-id",
+                        "in": "path",
+                        "description": "Unique identifier of the tenant.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "auth-provider",
+                        "in": "query",
+                        "description": "Authentication provider of an API.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "visibility",
+                        "in": "query",
+                        "description": "Visibility of an API.",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "apis"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "An array of APIs",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Api"
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "Unexpected error.",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Post a collection of APIs for a tenant",
+                "operationId": "post-apis",
+                "description": "Deliver a collection of APIs from API portfolio of a tenant.\n",
+                "parameters": [
+                    {
+                        "name": "tenant-id",
+                        "in": "path",
+                        "description": "Unique identifier of the tenant.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "api",
+                        "in": "body",
+                        "description": "APIs to be delivered.",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Api"
+                            }
+                        }
+                    }
+                ],
+                "tags": [
+                    "apis"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "An array of APIs was successfully saved."
+                    },
+                    "default": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/tenants/{tenant-id}/applications": {
+            "get": {
+                "summary": "Applications, visible for an authorized and registered user",
+                "operationId": "get-applications",
+                "description": "Collections of applications, which are visible in the API Portal for an\nauthorized and registered user.\n\nEach application from this collection can be registered as an API\nconsumer in the API Portal by authorized and registered user.\n",
+                "parameters": [
+                    {
+                        "name": "email",
+                        "in": "header",
+                        "description": "Mail address of the user, unique within a tenant.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "tenant-id",
+                        "in": "path",
+                        "description": "Unique identifier of the tenant.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "shortname",
+                        "in": "query",
+                        "description": "Shortname of an application.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "mailbox",
+                        "in": "query",
+                        "description": "Mailbox of an application.",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "applications"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "An array of applications",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Application"
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Post a collection of applications for a tenant",
+                "operationId": "post-appplications",
+                "description": "Deliver a collection of applications from application portfolio of a tenant.\n",
+                "parameters": [
+                    {
+                        "name": "tenant-id",
+                        "in": "path",
+                        "description": "Unique identifier of the tenant.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "application",
+                        "in": "body",
+                        "description": "Applications to be delivered.",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Application"
+                            }
+                        }
+                    }
+                ],
+                "tags": [
+                    "applications"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "An array of applications was successfully saved."
+                    },
+                    "default": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/tenants/{tenant-id}/login": {
+            "post": {
+                "summary": "Login user into the API Portal",
+                "operationId": "post-login",
+                "description": "Login user into the API Portal.\n",
+                "parameters": [
+                    {
+                        "name": "tenant-id",
+                        "in": "path",
+                        "description": "Unique identifier of the tenant.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "user",
+                        "in": "body",
+                        "description": "User to be log in.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    }
+                ],
+                "tags": [
+                    "login"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "User is logged in."
+                    },
+                    "default": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/tenants/{tenant-id}/users": {
+            "get": {
+                "summary": "Read a collection of the API Portal users",
+                "operationId": "get-users",
+                "description": "Read a collection of the existing API Portal users of a concrete tenant.\n",
+                "parameters": [
+                    {
+                        "name": "tenant-id",
+                        "in": "path",
+                        "description": "Unique identifier of the tenant.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "firstname",
+                        "in": "query",
+                        "description": "Firstname of an API Portal user.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "lastname",
+                        "in": "query",
+                        "description": "Lastname of an API Portal user.",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "users"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Collection with existing API Portal users.",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/User"
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Post a new user of an API Portal",
+                "operationId": "post-user",
+                "description": "Create a brand new API Portal user.\n",
+                "parameters": [
+                    {
+                        "name": "tenant-id",
+                        "in": "path",
+                        "description": "Unique identifier of the tenant.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "user",
+                        "in": "body",
+                        "description": "API Portal user to be delivered.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    }
+                ],
+                "tags": [
+                    "users"
+                ],
+                "responses": {
+                    "201": {
+                        "description": "New API Portal user is added.",
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    },
+                    "default": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/tenants/{tenant-id}/users/{email}": {
+            "get": {
+                "summary": "Read API Portal user information",
+                "operationId": "get-user",
+                "description": "Read data of the existing API Portal user by his email address.\n",
+                "parameters": [
+                    {
+                        "name": "tenant-id",
+                        "in": "path",
+                        "description": "Unique identifier of the tenant.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "email",
+                        "in": "path",
+                        "description": "Email address of the API Portal user.",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "users"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "An API Portal user.",
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    },
+                    "404": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "default": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Update an exisiting API Portal user",
+                "operationId": "put-user",
+                "description": "Update of the existing API Portal user.\n",
+                "parameters": [
+                    {
+                        "name": "tenant-id",
+                        "in": "path",
+                        "description": "Unique identifier of the tenant.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "email",
+                        "in": "path",
+                        "description": "Email address of the API Portal user.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "user",
+                        "in": "body",
+                        "description": "An API portal user to be delivered.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    }
+                ],
+                "tags": [
+                    "users"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "An API Portal user is successfully updated.",
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    },
+                    "404": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "default": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/tenants": {
+            "post": {
+                "summary": "Create a new tenant",
+                "operationId": "post-tenant",
+                "description": "Create a brand new API Portal tenant.\n",
+                "parameters": [
+                    {
+                        "name": "tenant",
+                        "in": "body",
+                        "description": "API Portal tenant to be delivered.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Tenant"
+                        }
+                    }
+                ],
+                "tags": [
+                    "tenants"
+                ],
+                "responses": {
+                    "201": {
+                        "description": "New API Portal tenant is created.",
+                        "schema": {
+                            "$ref": "#/definitions/Tenant"
+                        }
+                    },
+                    "default": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "Api": {
+            "type": "object",
+            "required": [
+                "api-uri",
+                "version",
+                "visibility",
+                "auth-providers"
+            ],
+            "properties": {
+                "api-uri": {
+                    "type": "string",
+                    "description": "Unique identifier representing a specific API for a given tenant. For example, api-portal/v1 or po/partner/v1."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "Description of an API."
+                },
+                "version": {
+                    "type": "number",
+                    "description": "Major version of an API."
+                },
+                "visibility": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Tenant"
+                    }
+                },
+                "auth-providers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/AuthProvider"
+                    }
+                },
+                "swagger-description": {
+                    "type": "string",
+                    "description": "API description in swagger format."
+                }
+            }
+        },
+        "Tenant": {
+            "type": "object",
+            "required": [
+                "tenant-id"
+            ],
+            "properties": {
+                "tenant-id": {
+                    "type": "string",
+                    "enum": [
+                        "CH-AXA",
+                        "FR-AXA",
+                        "CH-TWINT",
+                        "PUBLIC"
+                    ],
+                    "description": "Unique identifier representing a specific tenant which can be an AXA OpCo or a business partner."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "Description of a tenant."
+                }
+            }
+        },
+        "Application": {
+            "type": "object",
+            "required": [
+                "appl-id",
+                "shortname"
+            ],
+            "properties": {
+                "appl-id": {
+                    "type": "string",
+                    "description": "Unique identifier representing a specific application for a given tenant."
+                },
+                "shortname": {
+                    "type": "string",
+                    "description": "Shortname of an application."
+                },
+                "mailbox": {
+                    "type": "string",
+                    "description": "Mailbox of an application."
+                }
+            }
+        },
+        "User": {
+            "type": "object",
+            "required": [
+                "email",
+                "firstname",
+                "lastname"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "description": "Email address of the API Portal user. Unique identifier of the user."
+                },
+                "firstname": {
+                    "type": "string",
+                    "description": "First name of the API Portal user."
+                },
+                "lastname": {
+                    "type": "string",
+                    "description": "Last name of the API Portal user."
+                },
+                "roles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Role"
+                    }
+                }
+            }
+        },
+        "Role": {
+            "type": "object",
+            "required": [
+                "role-id"
+            ],
+            "properties": {
+                "role-id": {
+                    "type": "string",
+                    "enum": [
+                        "Admin",
+                        "CH-AXA-User",
+                        "CH-AXA-Admin",
+                        "FR-AXA-User",
+                        "FR-AXA-Admin",
+                        "CH-TWINT-User"
+                    ],
+                    "description": "Unique identifier representing a specific role of an API Portal user."
+                }
+            }
+        },
+        "ApiConsumer": {
+            "type": "object",
+            "required": [
+                "consumer-id",
+                "endpoint-url",
+                "application",
+                "auth-provider"
+            ],
+            "properties": {
+                "consumer-id": {
+                    "type": "string",
+                    "description": "Unique identifier representing a consumer of an API."
+                },
+                "rate-limit": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "Rate Limit of the API usage per second."
+                },
+                "endpoint-url": {
+                    "type": "string",
+                    "description": "API consumer endpoint on their side."
+                },
+                "application": {
+                    "$ref": "#/definitions/Application"
+                },
+                "auth-provider": {
+                    "$ref": "#/definitions/AuthProvider"
+                }
+            }
+        },
+        "AuthProvider": {
+            "type": "object",
+            "required": [
+                "provider-type"
+            ],
+            "properties": {
+                "provider-type": {
+                    "type": "string",
+                    "enum": [
+                        "OAuth",
+                        "Mutual SSL",
+                        "API-Key",
+                        "Public"
+                    ],
+                    "description": "Type of the authorization provider."
+                },
+                "api-key": {
+                    "type": "string",
+                    "description": "API key, if needed."
+                },
+                "oauth-provider": {
+                    "$ref": "#/definitions/OAuthProvider"
+                }
+            }
+        },
+        "OAuthProvider": {
+            "type": "object",
+            "required": [
+                "client-id",
+                "scope"
+            ],
+            "properties": {
+                "client-id": {
+                    "type": "string",
+                    "description": "Client ID for an OAuth API consumer."
+                },
+                "client-secret": {
+                    "type": "string",
+                    "description": "Client secret for an OAuth API consumer."
+                },
+                "scope": {
+                    "type": "string",
+                    "enum": [
+                        "b2c-axa-ch-basic",
+                        "b2c-axa-ch-advanced",
+                        "b2e-axa-ch",
+                        "b2c-axa-fr-basic",
+                        "b2c-axa-fr-advanced",
+                        "b2e-axa-fr",
+                        "b2b",
+                        "other"
+                    ],
+                    "description": "Name of the scope for an OAuth API consumer."
+                }
+            }
+        },
+        "Error": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "fields": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
