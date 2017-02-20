@@ -13,8 +13,12 @@
       "./mixins"
     ]
   },
-  "Api": {
-    "dataSource": "db",
+  "api": {
+    "dataSource": "mongodb",
+    "public": true
+  },
+  "tenant": {
+    "dataSource": "mongodb",
     "public": true
   }
 }
