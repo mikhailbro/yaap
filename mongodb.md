@@ -10,4 +10,4 @@
 - Check using the mongo shell: 
   - _<mongodb>/bin/mongo>_
   - _use yaap_
-  - _db.Api.find()_ will show you the new created Api document
+  - _db.api.find()_ will show you the new created Api document
