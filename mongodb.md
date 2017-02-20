@@ -5,9 +5,9 @@
 
 # MongoDB connector in yaap
 - install the mongodb connector for loopback: _npm install loopback-connector-mongodb --save_
-- the mongo db name is _yaap_
+- the mongo db name is _yaap_ (already configured in yaap application)
 - Create an Api document using the explorer: _http://localhost:3000/explorer_
 - Check using the mongo shell: 
-  - _<mongodb>/bin/mongo>_
+  - _mongodb/bin/mongo_
   - _use yaap_
   - _db.api.find()_ will show you the new created Api document
