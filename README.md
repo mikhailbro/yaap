@@ -10,7 +10,6 @@ Design and (eventually) implementation
 * Resource model
 * API Design
 * Role model and permissions
-* Security How To (Access Tokens, Roles, etc.)
 * Webhooks
 * 
 
