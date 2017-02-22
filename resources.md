@@ -9,8 +9,8 @@
 - authorization-methods (OAuth, HTTP Basic Auth, Client Certs, etc.)
 
 # TENANT
-- id
-- name
+- ~~id~~
+- ~~name~~
 - role names for 4 roles (admin, tenant-admin, provider, consumer)
 
 # CLIENT (Application)
