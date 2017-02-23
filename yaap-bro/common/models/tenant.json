@@ -1,0 +1,43 @@
+{
+  "name": "tenant",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "id": {
+      "type": "string",
+      "required": true
+    },
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "tenant-admin-role": {
+      "type": "string",
+      "description": "The name of the administrator role of a tenant",
+      "required": true
+    },
+    "tenant-provider-role": {
+      "type": "string",
+      "description": "The name of the provider role of a tenant",
+      "required": true
+    },
+    "tenant-consumer-role": {
+      "type": "string",
+      "description": "The name of the administrator role of a tenant",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {
+    "apis": {
+      "type": "hasMany",
+      "model": "api",
+      "foreignKey": "tenant-id"
+    }
+  },
+  "acls": [],
+  "methods": {}
+}
