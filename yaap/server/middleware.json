@@ -31,7 +31,9 @@
     }
   },
   "session": {},
-  "auth": {},
+  "auth": {
+    "./middleware/jwt": {}
+  },
   "parse": {},
   "routes": {
     "loopback#rest": {
