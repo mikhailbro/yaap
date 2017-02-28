@@ -1,0 +1,1066 @@
+{
+	"variables": [],
+	"info": {
+		"name": "yaap",
+		"_postman_id": "dc8713da-6ed3-f3b1-6f30-894719b7169d",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "01 - Testcases for Runner 'tenants'",
+			"description": "",
+			"item": [
+				{
+					"name": "ok (admin) - TENANT 1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"POST - Status Code\"] = responseCode.code === 200;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.name\"] = jsonData.name === \"TENANT 1\";",
+									"tests[\"body.apiOwnerRole\"] = jsonData.apiOwnerRole === \"api-owner_tenant-1\";",
+									"tests[\"body.apiConsumerRole\"] = jsonData.apiConsumerRole === \"api-consumer_tenant-1\";",
+									"",
+									"postman.setGlobalVariable(\"tenantId_1\", jsonData.id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://localhost:3000/api/tenants",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwicm9sZXMiOnsiYWRtaW4iOnRydWV9fQ.xn2P_IPz5TpWOFe1kUh-t9szobGDkym9jDk7OPheC_8",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"TENANT 1\",\n    \"apiOwnerRole\": \"api-owner_tenant-1\",\n    \"apiConsumerRole\": \"api-consumer_tenant-1\",\n    \"tenantAdminRole\": \"tenant-admin_tenant-1\"\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "ok (admin) - TENANT 2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"POST - Status Code\"] = responseCode.code === 200;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.name\"] = jsonData.name === \"TENANT 2\";",
+									"tests[\"body.apiOwnerRole\"] = jsonData.apiOwnerRole === \"api-owner_tenant-2\";",
+									"tests[\"body.apiConsumerRole\"] = jsonData.apiConsumerRole === \"api-consumer_tenant-2\";",
+									"",
+									"postman.setGlobalVariable(\"tenantId_2\", jsonData.id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://localhost:3000/api/tenants",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwicm9sZXMiOnsiYWRtaW4iOnRydWV9fQ.xn2P_IPz5TpWOFe1kUh-t9szobGDkym9jDk7OPheC_8",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"TENANT 2\",\n    \"apiOwnerRole\": \"api-owner_tenant-2\",\n    \"apiConsumerRole\": \"api-consumer_tenant-2\",\n    \"tenantAdminRole\": \"tenant-admin_tenant-2\"\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "nok (not admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"POST - Status Code\"] = responseCode.code === 400;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.error.name\"] = jsonData.error.name === \"Error\";",
+									"tests[\"body.error.message\"] = jsonData.error.message === \"You must be admin for this operation.\";"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://localhost:3000/api/tenants",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"TENANT 3\",\n    \"apiOwnerRole\": \"api-owner_tenant-3\",\n    \"apiConsumerRole\": \"api-consumer_tenant-3\"\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "ok (admin) - all tenants",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"GET - Status Code\"] = responseCode.code === 200;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.name\"] = jsonData[0].name === \"TENANT 1\";",
+									"tests[\"body.id\"] = jsonData[0].id === postman.getGlobalVariable(\"tenantId_1\");",
+									"tests[\"body.name\"] = jsonData[1].name === \"TENANT 2\";",
+									"tests[\"body.id\"] = jsonData[1].id === postman.getGlobalVariable(\"tenantId_2\");",
+									"",
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://localhost:3000/api/tenants",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwicm9sZXMiOnsiYWRtaW4iOnRydWV9fQ.xn2P_IPz5TpWOFe1kUh-t9szobGDkym9jDk7OPheC_8",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "nok (not admin) - all tenants",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"GET - Status Code\"] = responseCode.code === 400;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.error.name\"] = jsonData.error.name === \"Error\";",
+									"tests[\"body.error.message\"] = jsonData.error.message === \"You must be admin for this operation.\";",
+									"",
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://localhost:3000/api/tenants/{{tenantId_1}}",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "ok (admin) - one tenant",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"GET - Status Code\"] = responseCode.code === 200;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.name\"] = jsonData.name === \"TENANT 1\";",
+									"tests[\"body.id\"] = jsonData.id === postman.getGlobalVariable(\"tenantId_1\");",
+									"",
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://localhost:3000/api/tenants/{{tenantId_1}}",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwicm9sZXMiOnsiYWRtaW4iOnRydWV9fQ.xn2P_IPz5TpWOFe1kUh-t9szobGDkym9jDk7OPheC_8",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "nok (not admin) - one tenant",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"GET - Status Code\"] = responseCode.code === 400;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.error.name\"] = jsonData.error.name === \"Error\";",
+									"tests[\"body.error.message\"] = jsonData.error.message === \"You must be admin for this operation.\";",
+									"",
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://localhost:3000/api/tenants",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "ok (admin) - one tenant",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"PUT - Status Code\"] = responseCode.code === 200;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.name\"] = jsonData.name === \"TENANT 1 UPDATED\";",
+									"tests[\"body.id\"] = jsonData.id === postman.getGlobalVariable(\"tenantId_1\");",
+									"",
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://localhost:3000/api/tenants/{{tenantId_1}}",
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwicm9sZXMiOnsiYWRtaW4iOnRydWV9fQ.xn2P_IPz5TpWOFe1kUh-t9szobGDkym9jDk7OPheC_8",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"TENANT 1 UPDATED\",\n    \"apiOwnerRole\": \"api-owner_tenant-1\",\n    \"apiConsumerRole\": \"api-consumer_tenant-1\"\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "nok (not admin) - one tenant",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"PUT - Status Code\"] = responseCode.code === 400;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.error.name\"] = jsonData.error.name === \"Error\";",
+									"tests[\"body.error.message\"] = jsonData.error.message === \"You must be admin for this operation.\";",
+									"",
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://localhost:3000/api/tenants/{{tenantId_1}}",
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"TENANT 2 UPDATED\",\n    \"apiOwnerRole\": \"api-owner_tenant-2\",\n    \"apiConsumerRole\": \"api-consumer_tenant-2\"\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "nok (not admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"DELETE - Status Code\"] = responseCode.code === 400;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.error.name\"] = jsonData.error.name === \"Error\";",
+									"tests[\"body.error.message\"] = jsonData.error.message === \"You must be admin for this operation.\";",
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://localhost:3000/api/tenants/{{tenantId_1}}",
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "02 - Testcases for Runner 'apis'",
+			"description": "",
+			"item": [
+				{
+					"name": "ok (owner TENANT 1 & 2)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"POST - Status Code\"] = responseCode.code === 200;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.name\"] = jsonData.name === \"myFirstApi\";",
+									"tests[\"body.tenantId\"] = jsonData.tenantId === postman.getGlobalVariable(\"tenantId_1\");",
+									"",
+									"",
+									"postman.setGlobalVariable(\"apiId_1\", jsonData.id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://localhost:3000/api/apis",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwicm9sZXMiOnsiYXBpT3duZXIiOlsiYXBpLW93bmVyX3RlbmFudC0xIiwiYXBpLW93bmVyX3RlbmFudC0yIl0sImFwaUNvbnN1bWVyIjpbXX19.2_aJpvCHghG3HiqtSyu3yWCrTMoo3Up1ifR3O9Qs4mY",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"myFirstApi\",\n  \"tenantId\": \"{{tenantId_1}}\",\n  \"swagger\": \"blah\"\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "nok (owner TENANT 2) - wrong tenantId",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"POST - Status Code\"] = responseCode.code === 400;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.name\"] = jsonData.error.name === \"Error\";",
+									"tests[\"body.message\"] = jsonData.error.message === \"Wrong tenantId in request body.\";"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://localhost:3000/api/apis",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwicm9sZXMiOnsiYXBpT3duZXIiOlsiYXBpLW93bmVyX3RlbmFudC0yIl0sImFwaUNvbnN1bWVyIjpbXX19.S2DUZ7pek6dmKbQOq-4Oe3SUrs64L_2DXwlN8PNXDP4",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"mySecondApi\",\n  \"tenantId\": \"{{tenantId_1}}\",\n  \"swagger\": \"blah\"\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "ok (owner TENANT 2)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"POST - Status Code\"] = responseCode.code === 200;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.name\"] = jsonData.name === \"mySecondApi\";",
+									"tests[\"body.tenantId\"] = jsonData.tenantId === postman.getGlobalVariable(\"tenantId_2\");",
+									"",
+									"",
+									"postman.setGlobalVariable(\"apiId_2\", jsonData.id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://localhost:3000/api/apis",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwicm9sZXMiOnsiYXBpT3duZXIiOlsiYXBpLW93bmVyX3RlbmFudC0yIl0sImFwaUNvbnN1bWVyIjpbXX19.S2DUZ7pek6dmKbQOq-4Oe3SUrs64L_2DXwlN8PNXDP4",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"mySecondApi\",\n  \"tenantId\": \"{{tenantId_2}}\",\n  \"swagger\": \"blah\"\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "ok (consumer TENANT 1) - get one",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"GET - Status Code\"] = responseCode.code === 200;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.name\"] = jsonData.name === \"myFirstApi\";",
+									"tests[\"body.tenantId\"] = jsonData.tenantId === postman.getGlobalVariable(\"tenantId_1\");"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://localhost:3000/api/apis/{{apiId_1}}",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwicm9sZXMiOnsiYXBpT3duZXIiOltdLCJhcGlDb25zdW1lciI6WyJhcGktY29uc3VtZXJfdGVuYW50LTEiXX19.2JtqKsYJpD7yOwq7pcY4H4CjCYJ5Nf2yMtZGTyCWJ8M",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "ok (consumer TENANT 1 & 2) - get one",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"GET - Status Code\"] = responseCode.code === 200;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.name\"] = jsonData.name === \"mySecondApi\";",
+									"tests[\"body.tenantId\"] = jsonData.tenantId === postman.getGlobalVariable(\"tenantId_2\");"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://localhost:3000/api/apis/{{apiId_2}}",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwicm9sZXMiOnsiYXBpT3duZXIiOltdLCJhcGlDb25zdW1lciI6WyJhcGktY29uc3VtZXJfdGVuYW50LTEiLCJhcGktY29uc3VtZXJfdGVuYW50LTIiXX19.FC0ztmR99pkzPJKCKkTvWS9A_w-4lDwSDYb7A_Ta1ig",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "ok (consumer TENANT 1 & 2) - get all",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"GET - Status Code\"] = responseCode.code === 200;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.name\"] = jsonData[0].name === \"myFirstApi\";",
+									"tests[\"body.tenantId\"] = jsonData[0].tenantId === postman.getGlobalVariable(\"tenantId_1\");",
+									"tests[\"body.name\"] = jsonData[1].name === \"mySecondApi\";",
+									"tests[\"body.tenantId\"] = jsonData[1].tenantId === postman.getGlobalVariable(\"tenantId_2\");"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://localhost:3000/api/apis",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwicm9sZXMiOnsiYXBpT3duZXIiOltdLCJhcGlDb25zdW1lciI6WyJhcGktY29uc3VtZXJfdGVuYW50LTEiLCJhcGktY29uc3VtZXJfdGVuYW50LTIiXX19.FC0ztmR99pkzPJKCKkTvWS9A_w-4lDwSDYb7A_Ta1ig",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "ok (consumer TENANT 2) - get all",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"GET - Status Code\"] = responseCode.code === 200;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.name\"] = jsonData[0].name === \"mySecondApi\";",
+									"tests[\"body.tenantId\"] = jsonData[0].tenantId === postman.getGlobalVariable(\"tenantId_2\");"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://localhost:3000/api/apis",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwicm9sZXMiOnsiYXBpT3duZXIiOltdLCJhcGlDb25zdW1lciI6WyJhcGktY29uc3VtZXJfdGVuYW50LTIiXX19.697pF0e7BzhMXv3H69dvn6eZZhXkRNn2-olJHCFXpYQ",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "ok (owner TENANT 1)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"PUT - Status Code\"] = responseCode.code === 200;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.name\"] = jsonData.name === \"myFirstApiUPDATED\";",
+									"tests[\"body.tenantId\"] = jsonData.tenantId === postman.getGlobalVariable(\"tenantId_1\");"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://localhost:3000/api/apis/{{apiId_1}}",
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwicm9sZXMiOnsiYXBpT3duZXIiOlsiYXBpLW93bmVyX3RlbmFudC0xIl0sImFwaUNvbnN1bWVyIjpbXX19.Z8eGdahUqQpx6yZTe_vsy8p8j5JbMvREHcpKfDa8M4o",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"myFirstApiUPDATED\",\n  \"tenantId\": \"{{tenantId_1}}\",\n  \"swagger\": \"blah\"\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "nok (owner TENANT 2) - wrong tenantId copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"PUT - Status Code\"] = responseCode.code === 404;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.name\"] = jsonData.error.name === \"Error\";",
+									"tests[\"body.code\"] = jsonData.error.code === \"MODEL_NOT_FOUND\";"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://localhost:3000/api/apis/{{apiId_1}}",
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwicm9sZXMiOnsiYXBpT3duZXIiOlsiYXBpLW93bmVyX3RlbmFudC0yIl0sImFwaUNvbnN1bWVyIjpbXX19.S2DUZ7pek6dmKbQOq-4Oe3SUrs64L_2DXwlN8PNXDP4",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"mySecondApi\",\n  \"tenantId\": \"{{tenantId_1}}\",\n  \"swagger\": \"blah\"\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "nok (owner TENANT 2)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"DELETE - Status Code\"] = responseCode.code === 404;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.name\"] = jsonData.error.name === \"Error\";"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://localhost:3000/api/apis/{{apiId_1}}",
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwicm9sZXMiOnsiYXBpT3duZXIiOlsiYXBpLW93bmVyX3RlbmFudC0yIl0sImFwaUNvbnN1bWVyIjpbXX19.S2DUZ7pek6dmKbQOq-4Oe3SUrs64L_2DXwlN8PNXDP4",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "03 - Testcases for Runner 'tenants/:id/apis'",
+			"description": "",
+			"item": [
+				{
+					"name": "ok (admin) - tenant/:id/apis",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"GET - Status Code\"] = responseCode.code === 200;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.name\"] = jsonData[0].name === \"myFirstApiUPDATED\";",
+									"tests[\"body.id\"] = jsonData[0].id === postman.getGlobalVariable(\"apiId_1\");",
+									"tests[\"body.tenantId\"] = jsonData[0].tenantId === postman.getGlobalVariable(\"tenantId_1\");",
+									"",
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://localhost:3000/api/tenants/{{tenantId_1}}/apis",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwicm9sZXMiOnsiYWRtaW4iOnRydWV9fQ.xn2P_IPz5TpWOFe1kUh-t9szobGDkym9jDk7OPheC_8",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "nok (not admin) - tenant/:id/apis",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"GET - Status Code\"] = responseCode.code === 400;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.error.name\"] = jsonData.error.name === \"Error\";",
+									"tests[\"body.error.message\"] = jsonData.error.message === \"You must be admin for this operation.\";",
+									"",
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://localhost:3000/api/tenants/{{tenantId_1}}/apis",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "ok (admin) - tenant/:id/apis",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"DELETE - Status Code\"] = responseCode.code === 204;",
+									"",
+									"postman.clearGlobalVariable(\"apiId_1\");"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://localhost:3000/api/tenants/{{tenantId_1}}/apis",
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwicm9sZXMiOnsiYWRtaW4iOnRydWV9fQ.xn2P_IPz5TpWOFe1kUh-t9szobGDkym9jDk7OPheC_8",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "nok (not admin) - tenant/:id/apis",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"DELETE - Status Code\"] = responseCode.code === 400;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.error.name\"] = jsonData.error.name === \"Error\";",
+									"tests[\"body.error.message\"] = jsonData.error.message === \"You must be admin for this operation.\";"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://localhost:3000/api/tenants/{{tenantId_1}}/apis",
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "99 - Finish",
+			"description": "",
+			"item": [
+				{
+					"name": "api ok (owner TENANT 1 & 2)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"DELETE - Status Code\"] = responseCode.code === 200;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.count\"] = jsonData.count === 1;",
+									"",
+									"postman.clearGlobalVariable(\"apiId_2\");"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://localhost:3000/api/apis/{{apiId_2}}",
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwicm9sZXMiOnsiYXBpT3duZXIiOlsiYXBpLW93bmVyX3RlbmFudC0xIiwiYXBpLW93bmVyX3RlbmFudC0yIl0sImFwaUNvbnN1bWVyIjpbXX19.2_aJpvCHghG3HiqtSyu3yWCrTMoo3Up1ifR3O9Qs4mY",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "tenant ok (admin) - tenant 1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"DELETE - Status Code\"] = responseCode.code === 200;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.count\"] = jsonData.count === 1;",
+									"",
+									"postman.clearGlobalVariable(\"tenantId_1\");"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://localhost:3000/api/tenants/{{tenantId_1}}",
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwicm9sZXMiOnsiYWRtaW4iOnRydWV9fQ.xn2P_IPz5TpWOFe1kUh-t9szobGDkym9jDk7OPheC_8",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "tenant ok (admin) - tenant 2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"DELETE - Status Code\"] = responseCode.code === 200;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.count\"] = jsonData.count === 1;",
+									"",
+									"postman.clearGlobalVariable(\"tenantId_2\");"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://localhost:3000/api/tenants/{{tenantId_2}}",
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwicm9sZXMiOnsiYWRtaW4iOnRydWV9fQ.xn2P_IPz5TpWOFe1kUh-t9szobGDkym9jDk7OPheC_8",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
