@@ -19,17 +19,7 @@
       "type": "string",
       "required": true
     },
-    "tenant-admin-role": {
-      "type": "string",
-      "description": "The name of the administrator role of a tenant",
-      "required": true
-    },
-    "tenant-provider-role": {
-      "type": "string",
-      "description": "The name of the provider role of a tenant",
-      "required": true
-    },
-    "tenant-consumer-role": {
+    "tenantAdminRole": {
       "type": "string",
       "description": "The name of the administrator role of a tenant",
       "required": true
@@ -40,11 +30,7 @@
     "apis": {
       "type": "hasMany",
       "model": "api",
-<<<<<<< HEAD
       "foreignKey": "tenantId"
-=======
-      "foreignKey": "tenant-id"
->>>>>>> 694104f6c8509e667dc84c1b240b112be70aaa73
     }
   },
   "acls": [],

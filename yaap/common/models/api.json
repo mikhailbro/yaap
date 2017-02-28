@@ -28,17 +28,17 @@
       "enum": ["enabled", "disabled", "deprecated"],
       "default": "enabled"
     },
-    "approval-workflow": {
+    "approvalWorkflow": {
       "type": "boolean",
       "description": "Needed for for client registrations",
       "required": true,
       "default": false
     },
-    "approval-endpoint": {
+    "approvalEndpoint": {
       "type": "string",
       "description": "Mandatory if approval-workflow is true"
     },
-    "authorization-methods": {
+    "authorizationMethods": {
       "type": "string",
       "enum": ["OAuth", "HTTP Basic Auth", "Client Certs"]
     }
@@ -48,7 +48,7 @@
     "clients": {
       "type": "hasAndBelongsToMany",
       "model": "client",
-      "foreignKey": "client-id"
+      "foreignKey": "clientId"
     }
   },
   "acls": [],
