@@ -20,5 +20,9 @@
   "tenant": {
     "dataSource": "mongodb",
     "public": true
+  },
+  "client": {
+    "dataSource": "mongodb",
+    "public": true
   }
 }
