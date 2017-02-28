@@ -17,3 +17,20 @@
 - Each API belongs to a tenant and sets its visibiliy (i.e. for which tenants is the API visible, incl. public)
 - API owners can manage all APIs visible for their tenant
 - API consumers can see and register to all APIs visible for their tenant AND public apis
+
+## Access Token
+- Must be Bearer Token in Authorizaton Header (later configurable)
+- Must be a signed JWT (for testing purpose HS256 with pw 'secret', later RS256)
+- JWT Payload:
+```
+{
+  "sub": "1234567890",
+  "name": "John Doe",
+  "roles": {
+    "admin": true,
+    "apiOwner": ["api-owner_tenant-1"],
+    "apiConsumer": ["api-consumer_tenant-1"],
+    "tenantAdmin": ["tenant-admin_tenant-1"]
+  }
+}
+```
