@@ -2,7 +2,7 @@
   "mongodb": {
     "host": "localhost",
     "port": 27017,
-    "url": "",
+    "url": false,
     "database": "yaap",
     "password": "",
     "name": "mongodb",

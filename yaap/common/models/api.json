@@ -2,11 +2,16 @@
   "name": "api",
   "base": "PersistedModel",
   "strict": true,
-  "idInjection": true,
+  "idInjection": false,
   "options": {
     "validateUpsert": true
   },
   "properties": {
+    "id": {
+      "type": "string",
+      "id": true,
+      "generated": false
+    },
     "name": {
       "type": "string",
       "required": true
@@ -15,7 +20,7 @@
       "type": [
         "string"
       ],
-      "description": "Array of tenant IDs. Is needed for authorization / visibility of APIs etc."
+      "description": "Array of tenant IDs. Is needed for authorization / visibility of APIs etc. No tenant means public!"
     },
     "swagger": {
       "type": "string",
@@ -38,7 +43,7 @@
       "type": "string",
       "description": "Mandatory if approval-workflow is true"
     },
-    "authorizationMethods": {
+    "authorizationMethod": {
       "type": "string",
       "enum": ["OAuth", "HTTP Basic Auth", "Client Certs"]
     }
