@@ -2,11 +2,16 @@
   "name": "tenant",
   "base": "PersistedModel",
   "strict": true,
-  "idInjection": true,
+  "idInjection": false,
   "options": {
     "validateUpsert": true
   },
   "properties": {
+    "id": {
+      "type": "string",
+      "id": true,
+      "generated": false
+    },
     "name": {
       "type": "string",
       "required": true
@@ -30,6 +35,11 @@
     "apis": {
       "type": "hasMany",
       "model": "api",
+      "foreignKey": "tenantId"
+    },
+    "clients": {
+      "type": "hasMany",
+      "model": "client",
       "foreignKey": "tenantId"
     }
   },

@@ -26,7 +26,13 @@
     }
   },
   "validations": [],
-  "relations": {},
+  "relations": {
+    "apis": {
+      "type": "hasAndBelongsToMany",
+      "model": "api",
+      "foreignKey": "apiId"
+    }
+  },
   "acls": [],
   "methods": {}
 }
