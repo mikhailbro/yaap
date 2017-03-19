@@ -17,12 +17,6 @@
     "contact": {
       "type": "string",
       "required": true
-    },
-    "consumedApis": {
-      "type": [
-        "string"
-      ],
-      "description": "Array of API IDs, which are consumed by this client"
     }
   },
   "validations": [],

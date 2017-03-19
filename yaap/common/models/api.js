@@ -1,8 +1,12 @@
 'use strict';
 
 module.exports = function(Api) {
+	
 	var uuid = require('node-uuid');
 
+	/**************************
+	*	Disable REST functions
+	***************************/
 	// Disable some functions via REST API according to http://loopback.io/doc/en/lb3/Exposing-models-over-REST.html
 	Api.disableRemoteMethodByName('exists'); 					// GET		/apis/:id/exists
 	Api.disableRemoteMethodByName('findOne');					// GET		/apis/findOne
@@ -14,19 +18,27 @@ module.exports = function(Api) {
 	Api.disableRemoteMethodByName('updateAll');					// POST		/apis/update
 	Api.disableRemoteMethodByName('upsertWithWhere');			// POST		/apis/upsertWithWhere
 
-	// Disable some relational functions 
+	// Disable some relational functions for tenants
+	Api.disableRemoteMethodByName('prototype.__get__tenant');			// GET 		/apis/:id/tenant
+	
+	// Disable some relational functions for clients
+	Api.disableRemoteMethodByName('prototype.__create__clients');		// POST		/apis/:id/clients
+	Api.disableRemoteMethodByName('prototype.__delete__clients');		// DELETE 	/apis/:id/clients
+	Api.disableRemoteMethodByName('prototype.__count__clients');		// GET 		/apis/:id/clients/count
 	Api.disableRemoteMethodByName('prototype.__findById__clients');		// GET		/apis/:id/clients/:clientId
 	Api.disableRemoteMethodByName('prototype.__updateById__clients');	// PUT		/apis/:id/clients/:clientId
 	Api.disableRemoteMethodByName('prototype.__destroyById__clients');	// DELETE	/apis/:id/clients/:clientId
-	Api.disableRemoteMethodByName('prototype.__count__clients');		// GET 		/apis/:id/clients/count
-	Api.disableRemoteMethodByName('prototype.__link__clients');
-	Api.disableRemoteMethodByName('prototype.__unlink__clients');
-	Api.disableRemoteMethodByName('prototype.__get__tenant');			// GET 		/apis/:id/tenant
+	Api.disableRemoteMethodByName('prototype.__exists__clients');		// HEAD 	/apis/:id/clients/rel/:clientId
 	
-	// Validation checks
+	/**************************
+	*	Validation Checks
+	***************************/
 	Api.validatesInclusionOf('state', {in: ['enabled', 'disabled', 'deprecated']});
 	
 
+	/**************************
+	*	Remote Hooks
+	***************************/
 	// GET /apis
 	Api.beforeRemote('find', function(context, unused, next) {
 	    if (!context.args.filter || !context.args.filter.where) {
@@ -63,7 +75,7 @@ module.exports = function(Api) {
 	// POST /apis
 	Api.beforeRemote('create', function(context, unused, next) {
 		
-		// Check that tenantId from body matches one tenant from apiOwner Role from token
+		// Check that tenantId from body (api) matches one tenant from apiOwner Role from token
 		if (!isTenantInArray(context.req.body.tenantId, context.req.apiOwnerTenants)) {
 			next(createError(400, 'Wrong tenantId in request body.', 'BAD_REQUEST'));
 			return;
@@ -150,43 +162,25 @@ module.exports = function(Api) {
 		});
 	});
 
-	
-	// POST	/apis/:id/clients
-	Api.beforeRemote('prototype.__create__clients', function(context, unused, next){
-		// Read Api first to check authorization
-		Api.findById(context.req.params.id, { fields: {audience: true} }, function(err, api) {
-			if (err) {
-				next(err);
-				return;
-			}
-			
-			// Check that tenantId from body matches one tenant from apiOwner Role from token
-
-
-			// Check if audience is public or clientTenantRole is matching to the audience of the API
-			if (api.audience.length == 0 || checkAudience(api.audience, context.req.apiConsumerTenants)) {
-				next();
-			} else {
-				next(createError(404, 'Unknown "api" id "' + context.req.params.id + '".', 'MODEL_NOT_FOUND'));
-			}
-			
-		});
-	});
-
 	// GET /apis/{id}/clients
-	Api.afterRemote('prototype.__get__clients', function(context, response, next) {
-		// TODO!!
-		// maybe beforeRemote() instead....
-		console.log(response);
-		next();
+	Api.beforeRemote('prototype.__get__clients', function(context, unused, next) {
+
 	});
 
-	// DELETE /apis/{id}/clients
-	Api.beforeRemote('prototype.__delete__clients', function(context, response, next) {
-		// TODO!!
-		next();
+	// PUT /apis/{id}/clients/rel/{clientId}
+	Api.beforeRemote('prototype.__link__clients', function(context, unused, next) {
+		// TODO
 	});
 
+	// DELETE /apis/{id}/clients/rel/{clientId}
+	Api.beforeRemote('prototype.__unlink__clients', function(context, unused, next) {
+		// TODO
+	});
+
+
+	/**************************
+	*	Helper Functions
+	***************************/
 	function isTenantInArray(tenantId, tenants) {
 		// NOTE: array.indexOf() doesn't seem to work with mongodb generated ids....
 		var isOk = false;
