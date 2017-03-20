@@ -1,8 +1,17 @@
 'use strict';
 
 module.exports = function(Client) {
+<<<<<<< HEAD
 	var uuid = require('node-uuid');
 	
+=======
+
+	var uuid = require('node-uuid');
+
+	/**************************
+	*	Disable REST functions
+	***************************/
+>>>>>>> aac3b6562b11e81f32cea911c5461b24c23f4b1d
 	// Disable some functions via REST API according to http://loopback.io/doc/en/lb3/Exposing-models-over-REST.html
 	Client.disableRemoteMethodByName('exists'); 					// GET		/clients/:id/exists
 	Client.disableRemoteMethodByName('findOne');					// GET		/clients/findOne
@@ -14,6 +23,7 @@ module.exports = function(Client) {
 	Client.disableRemoteMethodByName('updateAll');					// POST		/clients/update
 	Client.disableRemoteMethodByName('upsertWithWhere');			// POST		/clients/upsertWithWhere
 
+<<<<<<< HEAD
 
 	// GET /clients
 	Client.beforeRemote('find', function(context, unused, next) {
@@ -129,4 +139,31 @@ module.exports = function(Client) {
     	});
 	}
 	
+=======
+	// Disable some relational functions for apis
+	Client.disableRemoteMethodByName('prototype.__create__apis');			// POST		/clients/:id/apis	
+	Client.disableRemoteMethodByName('prototype.__delete__apis');			// DELETE	/clients/:id/apis
+	Client.disableRemoteMethodByName('prototype.__findById__apis');			// GET		/clients/:id/apis/:apiId
+	Client.disableRemoteMethodByName('prototype.__updateById__apis');		// PUT		/clients/:id/apis/:apiId
+	Client.disableRemoteMethodByName('prototype.__destroyById__apis');		// DELETE	/clients/:id/apis/:apiId
+	Client.disableRemoteMethodByName('prototype.__count__apis');			// GET 		/clients/:id/apis/count
+	Client.disableRemoteMethodByName('prototype.__link__apis');				// PUT 		/clients/:id/apis/rel/:apiId
+	Client.disableRemoteMethodByName('prototype.__unlink__apis');			// DELETE 	/clients/:id/apis/rel/:apiId
+	Client.disableRemoteMethodByName('prototype.__exists__apis');		// HEAD 	/clients/:id/apis/rel/:apiId
+
+	/**************************
+	*	Validation Checks
+	***************************/
+	// TODO
+
+	/**************************
+	*	Remote Hooks
+	***************************/
+	// TODO
+
+	/**************************
+	*	Helper Functions
+	***************************/
+	// TODO
+>>>>>>> aac3b6562b11e81f32cea911c5461b24c23f4b1d
 };

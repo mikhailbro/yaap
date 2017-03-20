@@ -17,16 +17,16 @@
     "contact": {
       "type": "string",
       "required": true
-    },
-    "consumedApis": {
-      "type": [
-        "string"
-      ],
-      "description": "Array of API IDs, which are consumed by this client"
     }
   },
   "validations": [],
-  "relations": {},
+  "relations": {
+    "apis": {
+      "type": "hasAndBelongsToMany",
+      "model": "api",
+      "foreignKey": "apiId"
+    }
+  },
   "acls": [],
   "methods": {}
 }

@@ -12,6 +12,10 @@
       "id": true,
       "generated": false
     },
+    "tenantId": {
+      "type": "string",
+      "required": true
+    },
     "name": {
       "type": "string",
       "required": true
@@ -23,8 +27,8 @@
       "description": "Array of tenant IDs. Is needed for authorization / visibility of APIs etc. No tenant means public!"
     },
     "swagger": {
-      "type": "string",
-      "description": "Contains detailed description of the API, e.g. version, hostname, basepath, contac, etc.",
+      "type": "object",
+      "description": "Contains detailed description of the API, e.g. version, hostname, basepath, contact, etc.",
       "required": true
     },
     "state": {
@@ -42,10 +46,6 @@
     "approvalEndpoint": {
       "type": "string",
       "description": "Mandatory if approval-workflow is true"
-    },
-    "authorizationMethod": {
-      "type": "string",
-      "enum": ["OAuth", "HTTP Basic Auth", "Client Certs"]
     }
   },
   "validations": [],
@@ -54,6 +54,11 @@
       "type": "hasAndBelongsToMany",
       "model": "client",
       "foreignKey": "clientId"
+    },
+    "tenant": {
+      "type": "belongsTo",
+      "model": "tenant",
+      "foreignKey": "tenantId"
     }
   },
   "acls": [],
