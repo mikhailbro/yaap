@@ -27,7 +27,6 @@ module.exports = function(Client) {
 
 		context.req.body.updatedBy = context.req.sub;
 		context.req.body.createdBy = context.req.sub;
-		console.log(context.req.body);
 		next();
 		// NOTE: FURTHER AUTHORIZATION / VALIDATION TO BE IMPLEMENTED!!
 	});
