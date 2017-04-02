@@ -2,8 +2,6 @@
 
 module.exports = function(Client) {
 	
-	var uuid = require('node-uuid');
-
 	/**************************
 	*	Disable REST functions
 	***************************/
@@ -23,5 +21,27 @@ module.exports = function(Client) {
 	*	Remote Hooks
 	***************************/
 	/* NEEDS TO BE CLARIFY: what is necessary here and what is not */
+
+	// POST /clients
+	Client.beforeRemote('create', function(context, unused, next) {
+
+		context.req.body.updatedBy = context.req.sub;
+		context.req.body.createdBy = context.req.sub;
+		console.log(context.req.body);
+		next();
+		// NOTE: FURTHER AUTHORIZATION / VALIDATION TO BE IMPLEMENTED!!
+	});
+
+	// PUT /clients/{id} and  POST /clients/{id}/replace
+	Client.beforeRemote('replaceById', function(context, unused, next) {
+
+		// Read Client first to check authorization
+		Client.findById(context.req.params.id, { fields: {tenantId: true, createdBy: true} }, function(err, client) {
+			context.req.body.updatedBy = context.req.sub;
+			context.req.body.createdBy = client.createdBy;
+			next();
+			// NOTE: FURTHER AUTHORIZATION / VALIDATION TO BE IMPLEMENTED!!
+		});
+	});
 	
 };

@@ -9,6 +9,9 @@ module.exports = function() {
     		var at = authorization.split(" ")[1] // Use only last part of 'Bearer xxx'
 			var at_decoded = jwt.verify(at, 'secret');
 			
+			// Set sub
+			req.sub = at_decoded.sub;
+			
 			// Check if user is admin
 			if (at_decoded.roles.admin) {
 				req.isAdmin = true;

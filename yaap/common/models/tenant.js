@@ -2,8 +2,6 @@
 
 module.exports = function(Tenant) {
 
-	var uuid = require('node-uuid');
-
 	// Disable some functions via REST API according to http://loopback.io/doc/en/lb3/Exposing-models-over-REST.html
 	Tenant.disableRemoteMethodByName('exists'); 					// GET		/tenants/:id/exists
 	Tenant.disableRemoteMethodByName('findOne');					// GET		/tenants/findOne
@@ -24,6 +22,8 @@ module.exports = function(Tenant) {
 	// all operations
 	Tenant.beforeRemote('**', function(context, unused, next) {
 	    if (context.req.isAdmin) {
+	    	context.req.body.updatedBy = context.req.sub;
+			context.req.body.createdBy = context.req.sub;
 	    	next();
 	    } else {
 	    	var error = new Error();
@@ -36,8 +36,8 @@ module.exports = function(Tenant) {
 
 	Tenant.beforeRemote('create', function(context, unused, next) {
 	    if (context.req.isAdmin) {
-	    	var newId = uuid.v4();
-			context.req.body.id = newId;
+	    	context.req.body.updatedBy = context.req.sub;
+			context.req.body.createdBy = context.req.sub;
 	    	next();
 	    } else {
 	    	var error = new Error();

@@ -8,7 +8,9 @@
   "properties": {
     "id": {
       "type": "string",
-      "required": true
+      "id": true,
+      "generated": false,
+      "defaultFn": "uuidv4"
     },
     "name": {
       "type": "string",
@@ -21,6 +23,14 @@
     "tenantId": {
       "type": "string",
       "required": false
+    },
+    "updatedBy": {
+      "type": "string",
+      "required": true
+    },
+    "createdBy": {
+      "type": "string",
+      "required": true
     }
   },
   "validations": [],
@@ -32,5 +42,11 @@
     }
   },
   "acls": [],
-  "methods": {}
+  "methods": {},
+  "mixins": {
+    "TimeStamp": {
+      "required" : true,
+      "validateUpsert": true
+    }
+  }
 }

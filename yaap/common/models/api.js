@@ -1,8 +1,6 @@
 'use strict';
 
 module.exports = function(Api) {
-	
-	var uuid = require('node-uuid');
 
 	/**************************
 	*	Disable REST functions
@@ -112,10 +110,6 @@ module.exports = function(Api) {
 
 	// POST /apis
 	Api.beforeRemote('create', function(context, unused, next) {
-		
-		// Use uuid as id
-		var newId = uuid.v4();
-		context.req.body.id = newId;
 
 		// Authorization
 		if (!context.req.isAdmin) {
@@ -133,7 +127,7 @@ module.exports = function(Api) {
 			return;	
 		}
 
-		// Check if all audiences exists as tenants
+		// Check if all audiences exist as tenants
 		if (!context.req.body.audience) {
 			context.req.body.audience = [];
 		}
@@ -142,6 +136,8 @@ module.exports = function(Api) {
 				next(createError(400, 'Audience does not exist.', 'BAD_REQUEST'));
 				return;
 			} else {
+				context.req.body.updatedBy = context.req.sub;
+				context.req.body.createdBy = context.req.sub;
 				next();
 			}
   		});
@@ -151,9 +147,26 @@ module.exports = function(Api) {
 	// PUT /apis/{id} and  POST /apis/{id}/replace
 	Api.beforeRemote('replaceById', function(context, unused, next) {
 		
-		// User is admin
-		if (context.req.isAdmin) {
-	    	// Input validation
+    	// Read Api first to check authorization
+		Api.findById(context.req.params.id, { fields: {tenantId: true, createdBy: true} }, function(err, api) {
+			if (err) {
+				next(err);
+				return;
+			}
+			
+			// Authorization: Is apiOwnerRole allowed to updated this api?	
+			if (!context.req.isAdmin && !isTenantInArray(api.tenantId, context.req.apiOwnerTenants)) {
+				next(createError(404, 'Unknown "api" id "' + context.req.params.id + '".', 'MODEL_NOT_FOUND'));
+				return;
+			}
+
+			// tenantId cannot be updated
+			if (api.tenantId != context.req.body.tenantId) {
+				next(createError(400, 'Attribute "tenantId" cannot be updated.'), 'BAD_REQUEST');
+				return;
+			}
+
+			// Input validation
 		    // ApprovalEndpoint must exist if approvalWorkflow = true
 			if (context.req.body.approvalWorkflow && !context.req.body.approvalEndpoint) {
 				next(createError(400, 'Input validation failed for "approvalEndpoint".', 'BAD_REQUEST'));
@@ -169,51 +182,12 @@ module.exports = function(Api) {
 					next(createError(400, 'Audience does not exist.', 'BAD_REQUEST'));
 					return;
 				} else {
+					context.req.body.updatedBy = context.req.sub;
+					context.req.body.createdBy = api.createdBy;
 					next();
 				}
 	  		});
-	    } else {
-	    	// Read Api first to check authorization
-			Api.findById(context.req.params.id, { fields: {tenantId: true} }, function(err, api) {
-				if (err) {
-					next(err);
-					return;
-				}
-				
-				// Authorization: Is apiOwnerRole allowed to updated this api?	
-				if (!isTenantInArray(api.tenantId, context.req.apiOwnerTenants)) {
-					next(createError(404, 'Unknown "api" id "' + context.req.params.id + '".', 'MODEL_NOT_FOUND'));
-					return;
-				}
-
-				// tenantId cannot be updated
-				if (api.tenantId != context.req.body.tenantId) {
-					next(createError(400, 'Attribute "tenantId" cannot be updated.'), 'BAD_REQUEST');
-					return;
-				}
-
-				// Input validation
-			    // ApprovalEndpoint must exist if approvalWorkflow = true
-				if (context.req.body.approvalWorkflow && !context.req.body.approvalEndpoint) {
-					next(createError(400, 'Input validation failed for "approvalEndpoint".', 'BAD_REQUEST'));
-					return;	
-				}
-
-				// Check if all audiences exists as tenants
-				if (!context.req.body.audience) {
-					context.req.body.audience = [];
-				}
-				Api.app.models.Tenant.find({where: { id: { inq: context.req.body.audience}}}, function(err, tenants) {
-					if (err || tenants.length != context.req.body.audience.length) {
-						next(createError(400, 'Audience does not exist.', 'BAD_REQUEST'));
-						return;
-					} else {
-						next();
-					}
-		  		});
-			});
-	    }
-
+		});
 		
 	});
 
@@ -270,59 +244,82 @@ module.exports = function(Api) {
 	// PUT /apis/{id}/clients/rel/{clientId}
 	Api.beforeRemote('prototype.__link__clients', function(context, unused, next) {
 		
-	    	// Check if client exists (seems to be a bug in strongloop that this is not checked out-of-the-box)
-			Api.app.models.Client.findById(context.req.params.fk, function(err, client) {
+    	// Check if client exists (seems to be a bug in strongloop that this is not checked out-of-the-box)
+		Api.app.models.Client.findById(context.req.params.fk, function(err, client) {
+			if (err) {
+				next(err);
+				return;
+			}
+
+			if (!client) {
+				next(createError(404, 'Unknown "client" id "' + context.req.params.fk + '".', 'MODEL_NOT_FOUND'));
+				return;	
+			}
+
+			// If the client has a tenantId it must match one of apiConsumerTenants
+			if (!context.req.isAdmin && client.tenantId && !isTenantInArray(client.tenantId, context.req.apiConsumerTenants)) {
+				next(createError(404, 'Unknown "client" id "' + context.req.params.fk + '".', 'MODEL_NOT_FOUND'));
+				return;	
+			}
+
+			// Note: Api must exist, this is checked by loopback when calling /apis/{id}/...
+
+			// Read Api to check authorization
+			Api.findById(context.req.params.id, { fields: {tenantId: true, audience: true} }, function(err, api) {
 				if (err) {
 					next(err);
 					return;
-				}
+				}				
 
-				if (!client) {
-					next(createError(404, 'Unknown "client" id "' + context.req.params.fk + '".', 'MODEL_NOT_FOUND'));
-					return;	
-				}
-
-				// If the client has a tenantId it must match one of apiConsumerTenants
-				if (!context.req.isAdmin && client.tenantId && !isTenantInArray(client.tenantId, context.req.apiConsumerTenants)) {
-					next(createError(404, 'Unknown "client" id "' + context.req.params.fk + '".', 'MODEL_NOT_FOUND'));
-					return;	
-				}
-
-				// Note: Api must exist, this is checked by loopback when calling /apis/{id}/...
-
-    			// Read Api to check authorization
-				Api.findById(context.req.params.id, { fields: {tenantId: true, audience: true} }, function(err, api) {
-					if (err) {
-						next(err);
+				// Not-Public APIs need further validation
+				if (api.audience.length != 0) {
+					
+					// Check that at least one audience of the api is in the apiConsumerRoles
+					if (!context.req.isAdmin && !checkAudience(api.audience, context.req.apiConsumerTenants)) {
+						next(createError(404, 'could not find a model with id ' + context.req.params.id, 'MODEL_NOT_FOUND'));
 						return;
-					}				
-
-					// Not-Public APIs need further validation
-					if (api.audience.length != 0) {
-						
-						// Check that at least one audience of the api is in the apiConsumerRoles
-						if (!context.req.isAdmin && !checkAudience(api.audience, context.req.apiConsumerTenants)) {
-							next(createError(404, 'could not find a model with id ' + context.req.params.id, 'MODEL_NOT_FOUND'));
-							return;
-						}
-
-						// Check that at least one audience matches the tenantId of the client
-						if (!client.tenantId || !isTenantInArray(client.tenantId, api.audience)) {
-							next(createError(400, 'Client ' + context.req.params.fk + ' is not allowed to be registered to the API '+ context.req.params.id + '.', 'BAD_REQUEST'));
-							return;
-						}
 					}
 
-					next();
-				});
+					// Check that at least one audience matches the tenantId of the client
+					if (!client.tenantId || !isTenantInArray(client.tenantId, api.audience)) {
+						next(createError(400, 'Client ' + context.req.params.fk + ' is not allowed to be registered to the API '+ context.req.params.id + '.', 'BAD_REQUEST'));
+						return;
+					}
+				}
 
+				next();
 			});
+
+		});	
 
 	});
 
 	// DELETE /apis/{id}/clients/rel/{clientId}
 	Api.beforeRemote('prototype.__unlink__clients', function(context, unused, next) {
-		// TODO
+		
+		// Check if client exists (seems to be a bug in strongloop that this is not checked out-of-the-box)
+		Api.app.models.Client.findById(context.req.params.fk, function(err, client) {
+			if (err) {
+				next(err);
+				return;
+			}
+
+			if (!client) {
+				next(createError(404, 'Unknown "client" id "' + context.req.params.fk + '".', 'MODEL_NOT_FOUND'));
+				return;	
+			}
+
+			// If the client has a tenantId it must match one of apiConsumerTenants
+			if (!context.req.isAdmin && client.tenantId && !isTenantInArray(client.tenantId, context.req.apiConsumerTenants)) {
+				next(createError(404, 'Unknown "client" id "' + context.req.params.fk + '".', 'MODEL_NOT_FOUND'));
+				return;	
+			}
+
+			// Note: Api must exist, this is checked by loopback when calling /apis/{id}/...
+
+			next();
+
+		});	
 	});
 
 	/**************************

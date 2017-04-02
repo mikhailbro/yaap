@@ -10,7 +10,8 @@
     "id": {
       "type": "string",
       "id": true,
-      "generated": false
+      "generated": false,
+      "defaultFn": "uuidv4"
     },
     "name": {
       "type": "string",
@@ -28,6 +29,14 @@
       "type": "string",
       "description": "The name of the administrator role of a tenant",
       "required": true
+    },
+    "updatedBy": {
+      "type": "string",
+      "required": true
+    },
+    "createdBy": {
+      "type": "string",
+      "required": true
     }
   },
   "validations": [],
@@ -44,5 +53,11 @@
     }
   },
   "acls": [],
-  "methods": {}
+  "methods": {},
+  "mixins": {
+    "TimeStamp": {
+      "required" : true,
+      "validateUpsert": true
+    }
+  }
 }
