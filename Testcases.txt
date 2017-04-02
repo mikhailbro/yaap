@@ -1,0 +1,23 @@
+create TENANT 1
+create TENANT 2
+create API 1 - audience 1
+create API 2 - audience 2
+create API 3 - no audience
+
+check existance of api      => API 123 / CLIENT 456
+check existance of client   => API 123 / CLIENT 456
+
+create CLIENT 1 - tenant 1
+create CLIENT 2 - tenant 2
+create CLIENT 3 - no tenant
+
+check authorization:
+- no consumerRole       => API 1 / CLIENT 3 => nok (consumerRole not allowed for API 1)
+- consumerRole 2        => API 1 / CLIENT 2 => nok (consumerRole not allowed for API 1)
+- no consumerRole       => API 3 / CLIENT 1 => nok (consumerRole not allowed for CLIENT 1)
+- consumerRole 2        => API 2 / CLIENT 1 => nok (consumerRole not allowed for CLIENT 1)
+- consumerRole 1 & 2    => API 1 / CLIENT 2 => nok (tenant of CLIENT 2 is not in audience of API 1)
+- admin                 => API 2 / CLIENT 1 => nok (tenant of CLIENT 1 is not in audience of API 2)
+- consumerRole 1        => API 1 / CLIENT 1 => ok
+- admin                 => API 2 / CLIENT 2 => ok
+- no consumerRole       => API 3 / CLIENT 3 => ok

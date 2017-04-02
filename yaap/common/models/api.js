@@ -39,52 +39,98 @@ module.exports = function(Api) {
 	/**************************
 	*	Remote Hooks
 	***************************/
+
+	// Replace $ref in swagger because it's a reserved keyword in mongodb :-(
+	Api.beforeRemote('**', function(context, unused, next) {
+		if (context.req.body.swagger) {
+			var temp = JSON.stringify(context.req.body.swagger).replace(/\$ref/g, '_ref');
+			context.req.body.swagger = JSON.parse(temp);
+		}
+		next();
+	});
+
+	// Replace $ref in swagger because it's a reserved keyword in mongodb :-(
+	Api.afterRemote('**', function(context, response, next){
+		// Response is one api object
+		if (response && response.length == 0 && response.swagger) {
+			var temp = JSON.stringify(response.swagger).replace(/_ref/g, '\$ref');
+			response.swagger = JSON.parse(temp);
+		}
+
+		// Response is an array of apis
+		if (response && response.length > 0) {
+			for (var i = 0; i < response.length; i++) {
+				if (response[i].swagger) {
+					var temp = JSON.stringify(response[i].swagger).replace(/_ref/g, '\$ref');
+					response[i].swagger = JSON.parse(temp);
+				}
+			}
+		}
+
+		next();
+	});
+
+
 	// GET /apis
 	Api.beforeRemote('find', function(context, unused, next) {
-	    if (!context.args.filter || !context.args.filter.where) {
-	    	// No 'where' filter in request, add where clause to check audience
-	    	context.args.filter = {where: {or: [{audience: { inq: context.req.apiConsumerTenants}}, {audience: []}]}};
+	    if (context.req.isAdmin) {
+	    	next();
 	    } else {
-	    	// 'where' clause in request, add AND clause to check audience
-	    	context.args.filter.where = {
-				and: [
-			    	{ or: [{ audience: { inq: context.req.apiConsumerTenants} }, { audience: [] }] },
-			    	context.args.filter.where
-			   	]
-			};
-    	
-	    }
-	    next();
+	    	if (!context.args.filter || !context.args.filter.where) {
+		    	// No 'where' filter in request, add where clause to check audience
+		    	context.args.filter.where = {or: [{audience: { inq: context.req.apiConsumerTenants}}, {audience: []}]};
+		    } else {
+		    	// 'where' clause in request, add AND clause to check audience
+		    	context.args.filter.where = {
+					and: [
+				    	{ or: [{ audience: { inq: context.req.apiConsumerTenants} }, { audience: [] }] },
+				    	context.args.filter.where
+				   	]
+				};
+		    }
+
+		    next();
+	    }  
+	    
 	 });
 
 	// GET /apis/{id} - use afterRemote() as no where clause can be set with findById in beforeRemote()
 	Api.afterRemote('findById', function(context, response, next) {
-		if (!response) {
-			next();
-			return;
-		}
-		
-		// Check if user has role apiConsumer for the audience of the API
-		if (checkAudience(response.audience, context.req.apiConsumerTenants) || response.audience.length == 0) {
+		if (!response || context.req.isAdmin) {
 			next();
 		} else {
-			next(createError(404, 'Unknown "api" id "' + response.id + '".', 'MODEL_NOT_FOUND'));
+			// Check if user has role apiConsumer for the audience of the API
+			if (checkAudience(response.audience, context.req.apiConsumerTenants) || response.audience.length == 0) {
+				next();
+			} else {
+				next(createError(404, 'Unknown "api" id "' + response.id + '".', 'MODEL_NOT_FOUND'));
+				return;
+			}
 		}
+		
 	 });
 
 	// POST /apis
 	Api.beforeRemote('create', function(context, unused, next) {
 		
-		// Check that tenantId from body (api) matches one tenant from apiOwner Role from token
-		if (!isTenantInArray(context.req.body.tenantId, context.req.apiOwnerTenants)) {
-			next(createError(400, 'Wrong tenantId in request body.', 'BAD_REQUEST'));
-			return;
-		}
+		// Use uuid as id
+		var newId = uuid.v4();
+		context.req.body.id = newId;
 
-		// ApprovalEndpoint must exist if approvalWorkflow = true
+		// Authorization
+		if (!context.req.isAdmin) {
+	    	// Check that tenantId from body (api) matches one tenant from apiOwner Role from token
+			if (!isTenantInArray(context.req.body.tenantId, context.req.apiOwnerTenants)) {
+				next(createError(400, 'Wrong tenantId in request body.', 'BAD_REQUEST'));
+				return;
+			}
+	    }
+
+	    // Input validation
+	    // ApprovalEndpoint must exist if approvalWorkflow = true
 		if (context.req.body.approvalWorkflow && !context.req.body.approvalEndpoint) {
 			next(createError(400, 'Input validation failed for "approvalEndpoint".', 'BAD_REQUEST'));
-			return;
+			return;	
 		}
 
 		// Check if all audiences exists as tenants
@@ -92,12 +138,11 @@ module.exports = function(Api) {
 			context.req.body.audience = [];
 		}
 		Api.app.models.Tenant.find({where: { id: { inq: context.req.body.audience}}}, function(err, tenants) {
-			if(err || tenants.length != context.req.body.audience.length) {
+			if (err || tenants.length != context.req.body.audience.length) {
 				next(createError(400, 'Audience does not exist.', 'BAD_REQUEST'));
+				return;
 			} else {
-				var newId = uuid.v4();
-				context.req.body.id = newId;
-				next();	
+				next();
 			}
   		});
 		
@@ -105,28 +150,14 @@ module.exports = function(Api) {
 
 	// PUT /apis/{id} and  POST /apis/{id}/replace
 	Api.beforeRemote('replaceById', function(context, unused, next) {
-		// Read Api first to check authorization
-		Api.findById(context.req.params.id, { fields: {tenantId: true} }, function(err, api) {
-			if (err) {
-				console.log(err);
-				next(err);
-				return;
-			}
-			
-			// Is apiOwnerRole allowed to updated this api?	
-			if (!isTenantInArray(api.tenantId, context.req.apiOwnerTenants)) {
-				next(createError(404, 'Unknown "api" id "' + context.req.params.id + '".', 'MODEL_NOT_FOUND'));
-			}
-
-			// tenantId cannot be updated
-			if (api.tenantId != context.req.body.tenantId) {
-				next(createError(400, 'Attribute "tenantId" cannot be updated.'), 'BAD_REQUEST');
-			}
-
-			// ApprovalEndpoint must exist if approvalWorkflow = true
+		
+		// User is admin
+		if (context.req.isAdmin) {
+	    	// Input validation
+		    // ApprovalEndpoint must exist if approvalWorkflow = true
 			if (context.req.body.approvalWorkflow && !context.req.body.approvalEndpoint) {
 				next(createError(400, 'Input validation failed for "approvalEndpoint".', 'BAD_REQUEST'));
-				return;
+				return;	
 			}
 
 			// Check if all audiences exists as tenants
@@ -134,42 +165,159 @@ module.exports = function(Api) {
 				context.req.body.audience = [];
 			}
 			Api.app.models.Tenant.find({where: { id: { inq: context.req.body.audience}}}, function(err, tenants) {
-				if(err || tenants.length != context.req.body.audience.length) {
+				if (err || tenants.length != context.req.body.audience.length) {
 					next(createError(400, 'Audience does not exist.', 'BAD_REQUEST'));
+					return;
 				} else {
-					next();	
+					next();
 				}
 	  		});
+	    } else {
+	    	// Read Api first to check authorization
+			Api.findById(context.req.params.id, { fields: {tenantId: true} }, function(err, api) {
+				if (err) {
+					next(err);
+					return;
+				}
+				
+				// Authorization: Is apiOwnerRole allowed to updated this api?	
+				if (!isTenantInArray(api.tenantId, context.req.apiOwnerTenants)) {
+					next(createError(404, 'Unknown "api" id "' + context.req.params.id + '".', 'MODEL_NOT_FOUND'));
+					return;
+				}
 
-		});
+				// tenantId cannot be updated
+				if (api.tenantId != context.req.body.tenantId) {
+					next(createError(400, 'Attribute "tenantId" cannot be updated.'), 'BAD_REQUEST');
+					return;
+				}
+
+				// Input validation
+			    // ApprovalEndpoint must exist if approvalWorkflow = true
+				if (context.req.body.approvalWorkflow && !context.req.body.approvalEndpoint) {
+					next(createError(400, 'Input validation failed for "approvalEndpoint".', 'BAD_REQUEST'));
+					return;	
+				}
+
+				// Check if all audiences exists as tenants
+				if (!context.req.body.audience) {
+					context.req.body.audience = [];
+				}
+				Api.app.models.Tenant.find({where: { id: { inq: context.req.body.audience}}}, function(err, tenants) {
+					if (err || tenants.length != context.req.body.audience.length) {
+						next(createError(400, 'Audience does not exist.', 'BAD_REQUEST'));
+						return;
+					} else {
+						next();
+					}
+		  		});
+			});
+	    }
+
+		
 	});
 
 	// DELETE /apis/{id}
 	Api.beforeRemote('deleteById', function(context, unused, next){
-		Api.findById(context.req.params.id, { fields: {tenantId: true} }, function(err, api) {
-			if (err) {
-				console.log(err);
-				next(err);
-			}
+		if (context.req.isAdmin) {
+	    	next();
+	    } else {
+	    	Api.findById(context.req.params.id, { fields: {tenantId: true} }, function(err, api) {
+				if (err) {
+					next(err);
+				}
 
-			// Check if apiOwnerRole is ok to delete
-			if (api && isTenantInArray(api.tenantId, context.req.apiOwnerTenants)) {
-				next();
-			} else {
-				next(createError(404, 'Unknown "api" id "' + context.req.params.id + '".', 'MODEL_NOT_FOUND'));
-			}
+				// Check if apiOwnerRole is ok to delete
+				if (api && isTenantInArray(api.tenantId, context.req.apiOwnerTenants)) {
+					next();
+				} else {
+					next(createError(404, 'Unknown "api" id "' + context.req.params.id + '".', 'MODEL_NOT_FOUND'));
+					return;
+				}
 
-		});
+			});
+	    }
+
+		
 	});
 
 	// GET /apis/{id}/clients
 	Api.beforeRemote('prototype.__get__clients', function(context, unused, next) {
+		if (context.req.isAdmin) {
+	    	next();
+	    } else {
+	    	// Read Api first to check authorization
+			Api.findById(context.req.params.id, { fields: {tenantId: true} }, function(err, api) {
+				if (err) {
+					next(err);
+					return;
+				}
 
+				// Is apiOwnerRole allowed to read this api?	
+				if (!isTenantInArray(api.tenantId, context.req.apiOwnerTenants)) {
+					next(createError(404, 'Unknown "api" id "' + context.req.params.id + '".', 'MODEL_NOT_FOUND'));
+					return;
+				} else {
+					next();
+				}
+
+			});
+	    }
+
+		
 	});
 
 	// PUT /apis/{id}/clients/rel/{clientId}
 	Api.beforeRemote('prototype.__link__clients', function(context, unused, next) {
-		// TODO
+		
+	    	// Check if client exists (seems to be a bug in strongloop that this is not checked out-of-the-box)
+			Api.app.models.Client.findById(context.req.params.fk, function(err, client) {
+				if (err) {
+					next(err);
+					return;
+				}
+
+				if (!client) {
+					next(createError(404, 'Unknown "client" id "' + context.req.params.fk + '".', 'MODEL_NOT_FOUND'));
+					return;	
+				}
+
+				// If the client has a tenantId it must match one of apiConsumerTenants
+				if (!context.req.isAdmin && client.tenantId && !isTenantInArray(client.tenantId, context.req.apiConsumerTenants)) {
+					next(createError(404, 'Unknown "client" id "' + context.req.params.fk + '".', 'MODEL_NOT_FOUND'));
+					return;	
+				}
+
+				// Note: Api must exist, this is checked by loopback when calling /apis/{id}/...
+
+    			// Read Api to check authorization
+				Api.findById(context.req.params.id, { fields: {tenantId: true, audience: true} }, function(err, api) {
+					if (err) {
+						next(err);
+						return;
+					}				
+
+					// Not-Public APIs need further validation
+					if (api.audience.length != 0) {
+						
+						// Check that at least one audience of the api is in the apiConsumerRoles
+						if (!context.req.isAdmin && !checkAudience(api.audience, context.req.apiConsumerTenants)) {
+							next(createError(404, 'could not find a model with id ' + context.req.params.id, 'MODEL_NOT_FOUND'));
+							return;
+						}
+
+						// Check that at least one audience matches the tenantId of the client
+						if (!client.tenantId || !isTenantInArray(client.tenantId, api.audience)) {
+							next(createError(400, 'Client ' + context.req.params.fk + ' is not allowed to be registered to the API '+ context.req.params.id + '.', 'BAD_REQUEST'));
+							return;
+						}
+					}
+
+					next();
+				});
+
+			});
+
 	});
 
 	// DELETE /apis/{id}/clients/rel/{clientId}
@@ -177,12 +325,11 @@ module.exports = function(Api) {
 		// TODO
 	});
 
-
 	/**************************
 	*	Helper Functions
 	***************************/
+
 	function isTenantInArray(tenantId, tenants) {
-		// NOTE: array.indexOf() doesn't seem to work with mongodb generated ids....
 		var isOk = false;
 		for (var i = 0; i < tenants.length; i++) {
 			if (tenants[i] == tenantId) {

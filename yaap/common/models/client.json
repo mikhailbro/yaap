@@ -17,6 +17,10 @@
     "contact": {
       "type": "string",
       "required": true
+    },
+    "tenantId": {
+      "type": "string",
+      "required": false
     }
   },
   "validations": [],
