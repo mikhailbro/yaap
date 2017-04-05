@@ -1,0 +1,46 @@
+{  
+    "name": "ClientRegistration",
+    "base": "PersistedModel",
+    "idInjection": false,
+    "strict": true,
+    "options": {
+		"validateUpsert": true
+  	},
+    "properties": {
+    	"id": {
+	  		"type": "string",
+	  		"id": true,
+	  		"generated": false,
+	  		"defaultFn": "uuidv4"
+		},
+		"updatedBy": {
+		  	"type": "string",
+		  	"required": true
+		},
+		"createdBy": {
+		  	"type": "string",
+		  	"required": true
+		}
+    },
+    "validations": [],
+    "relations": {
+        "api": {
+        	"type": "belongsTo",
+        	"model": "Api",
+        	"foreignKey": "apiId"
+        },
+        "client": {
+        	"type": "belongsTo",
+        	"model": "Client",
+        	"foreignKey": "clientId"
+        }
+    },
+    "acls": [],
+    "methods": {},
+    "mixins": {
+        "TimeStamp": {
+        	"required" : true,
+        	"validateUpsert": true
+        }
+    }
+}

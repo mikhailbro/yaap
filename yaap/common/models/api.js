@@ -68,20 +68,19 @@ module.exports = function(Api) {
 		next();
 	});
 
-
 	// GET /apis
 	Api.beforeRemote('find', function(context, unused, next) {
-	    if (context.req.isAdmin) {
+	    if (context.req.user.isAdmin) {
 	    	next();
 	    } else {
 	    	if (!context.args.filter || !context.args.filter.where) {
 		    	// No 'where' filter in request, add where clause to check audience
-		    	context.args.filter.where = {or: [{audience: { inq: context.req.apiConsumerTenants}}, {audience: []}]};
+		    	context.args.filter.where = {or: [{audience: { inq: context.req.user.apiConsumerTenants}}, {audience: []}]};
 		    } else {
 		    	// 'where' clause in request, add AND clause to check audience
 		    	context.args.filter.where = {
 					and: [
-				    	{ or: [{ audience: { inq: context.req.apiConsumerTenants} }, { audience: [] }] },
+				    	{ or: [{ audience: { inq: context.req.user.apiConsumerTenants} }, { audience: [] }] },
 				    	context.args.filter.where
 				   	]
 				};
@@ -94,11 +93,11 @@ module.exports = function(Api) {
 
 	// GET /apis/{id} - use afterRemote() as no where clause can be set with findById in beforeRemote()
 	Api.afterRemote('findById', function(context, response, next) {
-		if (!response || context.req.isAdmin) {
+		if (!response || context.req.user.isAdmin) {
 			next();
 		} else {
 			// Check if user has role apiConsumer for the audience of the API
-			if (checkAudience(response.audience, context.req.apiConsumerTenants) || response.audience.length == 0) {
+			if (checkAudience(response.audience, context.req.user.apiConsumerTenants) || response.audience.length == 0) {
 				next();
 			} else {
 				next(createError(404, 'Unknown "api" id "' + response.id + '".', 'MODEL_NOT_FOUND'));
@@ -112,9 +111,9 @@ module.exports = function(Api) {
 	Api.beforeRemote('create', function(context, unused, next) {
 
 		// Authorization
-		if (!context.req.isAdmin) {
+		if (!context.req.user.isAdmin) {
 	    	// Check that tenantId from body (api) matches one tenant from apiOwner Role from token
-			if (!isTenantInArray(context.req.body.tenantId, context.req.apiOwnerTenants)) {
+			if (!isTenantInArray(context.req.body.tenantId, context.req.user.apiOwnerTenants)) {
 				next(createError(400, 'Wrong tenantId in request body.', 'BAD_REQUEST'));
 				return;
 			}
@@ -136,8 +135,8 @@ module.exports = function(Api) {
 				next(createError(400, 'Audience does not exist.', 'BAD_REQUEST'));
 				return;
 			} else {
-				context.req.body.updatedBy = context.req.sub;
-				context.req.body.createdBy = context.req.sub;
+				context.req.body.updatedBy = context.req.user.sub;
+				context.req.body.createdBy = context.req.user.sub;
 				next();
 			}
   		});
@@ -155,7 +154,7 @@ module.exports = function(Api) {
 			}
 			
 			// Authorization: Is apiOwnerRole allowed to updated this api?	
-			if (!context.req.isAdmin && !isTenantInArray(api.tenantId, context.req.apiOwnerTenants)) {
+			if (!context.req.user.isAdmin && !isTenantInArray(api.tenantId, context.req.user.apiOwnerTenants)) {
 				next(createError(404, 'Unknown "api" id "' + context.req.params.id + '".', 'MODEL_NOT_FOUND'));
 				return;
 			}
@@ -182,7 +181,7 @@ module.exports = function(Api) {
 					next(createError(400, 'Audience does not exist.', 'BAD_REQUEST'));
 					return;
 				} else {
-					context.req.body.updatedBy = context.req.sub;
+					context.req.body.updatedBy = context.req.user.sub;
 					context.req.body.createdBy = api.createdBy;
 					next();
 				}
@@ -193,7 +192,7 @@ module.exports = function(Api) {
 
 	// DELETE /apis/{id}
 	Api.beforeRemote('deleteById', function(context, unused, next){
-		if (context.req.isAdmin) {
+		if (context.req.user.isAdmin) {
 	    	next();
 	    } else {
 	    	Api.findById(context.req.params.id, { fields: {tenantId: true} }, function(err, api) {
@@ -202,7 +201,7 @@ module.exports = function(Api) {
 				}
 
 				// Check if apiOwnerRole is ok to delete
-				if (api && isTenantInArray(api.tenantId, context.req.apiOwnerTenants)) {
+				if (api && isTenantInArray(api.tenantId, context.req.user.apiOwnerTenants)) {
 					next();
 				} else {
 					next(createError(404, 'Unknown "api" id "' + context.req.params.id + '".', 'MODEL_NOT_FOUND'));
@@ -217,7 +216,8 @@ module.exports = function(Api) {
 
 	// GET /apis/{id}/clients
 	Api.beforeRemote('prototype.__get__clients', function(context, unused, next) {
-		if (context.req.isAdmin) {
+		
+		if (context.req.user.isAdmin) {
 	    	next();
 	    } else {
 	    	// Read Api first to check authorization
@@ -228,7 +228,7 @@ module.exports = function(Api) {
 				}
 
 				// Is apiOwnerRole allowed to read this api?	
-				if (!isTenantInArray(api.tenantId, context.req.apiOwnerTenants)) {
+				if (!isTenantInArray(api.tenantId, context.req.user.apiOwnerTenants)) {
 					next(createError(404, 'Unknown "api" id "' + context.req.params.id + '".', 'MODEL_NOT_FOUND'));
 					return;
 				} else {
@@ -244,6 +244,8 @@ module.exports = function(Api) {
 	// PUT /apis/{id}/clients/rel/{clientId}
 	Api.beforeRemote('prototype.__link__clients', function(context, unused, next) {
 		
+		// Note: Api must exist, this is checked by loopback when calling /apis/{id}/...
+
     	// Check if client exists (seems to be a bug in strongloop that this is not checked out-of-the-box)
 		Api.app.models.Client.findById(context.req.params.fk, function(err, client) {
 			if (err) {
@@ -257,12 +259,10 @@ module.exports = function(Api) {
 			}
 
 			// If the client has a tenantId it must match one of apiConsumerTenants
-			if (!context.req.isAdmin && client.tenantId && !isTenantInArray(client.tenantId, context.req.apiConsumerTenants)) {
+			if (!context.req.user.isAdmin && client.tenantId && !isTenantInArray(client.tenantId, context.req.user.apiConsumerTenants)) {
 				next(createError(404, 'Unknown "client" id "' + context.req.params.fk + '".', 'MODEL_NOT_FOUND'));
 				return;	
 			}
-
-			// Note: Api must exist, this is checked by loopback when calling /apis/{id}/...
 
 			// Read Api to check authorization
 			Api.findById(context.req.params.id, { fields: {tenantId: true, audience: true} }, function(err, api) {
@@ -275,7 +275,7 @@ module.exports = function(Api) {
 				if (api.audience.length != 0) {
 					
 					// Check that at least one audience of the api is in the apiConsumerRoles
-					if (!context.req.isAdmin && !checkAudience(api.audience, context.req.apiConsumerTenants)) {
+					if (!context.req.user.isAdmin && !checkAudience(api.audience, context.req.user.apiConsumerTenants)) {
 						next(createError(404, 'could not find a model with id ' + context.req.params.id, 'MODEL_NOT_FOUND'));
 						return;
 					}
@@ -287,6 +287,8 @@ module.exports = function(Api) {
 					}
 				}
 
+				context.req.body.createdBy = context.req.user.sub;
+				context.req.body.updatedBy = context.req.user.sub;
 				next();
 			});
 
@@ -304,18 +306,21 @@ module.exports = function(Api) {
 				return;
 			}
 
+			// Note: Api must exist, this is checked by loopback when calling /apis/{id}/...
+
 			if (!client) {
 				next(createError(404, 'Unknown "client" id "' + context.req.params.fk + '".', 'MODEL_NOT_FOUND'));
 				return;	
 			}
 
 			// If the client has a tenantId it must match one of apiConsumerTenants
-			if (!context.req.isAdmin && client.tenantId && !isTenantInArray(client.tenantId, context.req.apiConsumerTenants)) {
+			// If the client has no tenantId the createdBy user must match the current user
+			if (!context.req.user.isAdmin && 
+				((client.tenantId && !isTenantInArray(client.tenantId, context.req.user.apiConsumerTenants)) || 
+				(!client.tenantId && client.createdBy != context.req.user.sub))) {
 				next(createError(404, 'Unknown "client" id "' + context.req.params.fk + '".', 'MODEL_NOT_FOUND'));
 				return;	
 			}
-
-			// Note: Api must exist, this is checked by loopback when calling /apis/{id}/...
 
 			next();
 

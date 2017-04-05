@@ -1,5 +1,5 @@
 {
-  "name": "tenant",
+  "name": "Tenant",
   "base": "PersistedModel",
   "strict": true,
   "idInjection": false,
@@ -43,12 +43,12 @@
   "relations": {
     "apis": {
       "type": "hasMany",
-      "model": "api",
+      "model": "Api",
       "foreignKey": "tenantId"
     },
     "clients": {
       "type": "hasMany",
-      "model": "client",
+      "model": "Client",
       "foreignKey": "tenantId"
     }
   },

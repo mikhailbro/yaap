@@ -21,9 +21,9 @@ module.exports = function(Tenant) {
 
 	// all operations
 	Tenant.beforeRemote('**', function(context, unused, next) {
-	    if (context.req.isAdmin) {
-	    	context.req.body.updatedBy = context.req.sub;
-			context.req.body.createdBy = context.req.sub;
+	    if (context.req.user.isAdmin) {
+	    	context.req.body.updatedBy = context.req.user.sub;
+			context.req.body.createdBy = context.req.user.sub;
 	    	next();
 	    } else {
 	    	var error = new Error();
@@ -35,9 +35,9 @@ module.exports = function(Tenant) {
 	});
 
 	Tenant.beforeRemote('create', function(context, unused, next) {
-	    if (context.req.isAdmin) {
-	    	context.req.body.updatedBy = context.req.sub;
-			context.req.body.createdBy = context.req.sub;
+	    if (context.req.user.isAdmin) {
+	    	context.req.body.updatedBy = context.req.user.sub;
+			context.req.body.createdBy = context.req.user.sub;
 	    	next();
 	    } else {
 	    	var error = new Error();

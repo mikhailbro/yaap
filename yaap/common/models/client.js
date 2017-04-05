@@ -25,8 +25,8 @@ module.exports = function(Client) {
 	// POST /clients
 	Client.beforeRemote('create', function(context, unused, next) {
 
-		context.req.body.updatedBy = context.req.sub;
-		context.req.body.createdBy = context.req.sub;
+		context.req.body.updatedBy = context.req.user.sub;
+		context.req.body.createdBy = context.req.user.sub;
 		next();
 		// NOTE: FURTHER AUTHORIZATION / VALIDATION TO BE IMPLEMENTED!!
 	});
@@ -36,7 +36,7 @@ module.exports = function(Client) {
 
 		// Read Client first to check authorization
 		Client.findById(context.req.params.id, { fields: {tenantId: true, createdBy: true} }, function(err, client) {
-			context.req.body.updatedBy = context.req.sub;
+			context.req.body.updatedBy = context.req.user.sub;
 			context.req.body.createdBy = client.createdBy;
 			next();
 			// NOTE: FURTHER AUTHORIZATION / VALIDATION TO BE IMPLEMENTED!!

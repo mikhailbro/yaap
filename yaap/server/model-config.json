@@ -14,16 +14,20 @@
       "./mixins"
     ]
   },
-  "api": {
+  "Tenant": {
     "dataSource": "mongodb",
     "public": true
   },
-  "tenant": {
+  "Api": {
     "dataSource": "mongodb",
     "public": true
   },
-  "client": {
+  "Client": {
     "dataSource": "mongodb",
     "public": true
+  },
+  "ClientRegistration": {
+    "dataSource": "mongodb",
+    "public": false
   }
 }
