@@ -3,7 +3,7 @@ Yet another API Portal - but purely based on APIs!
 
 Tired of API Portals ....  
 ... with proprietary integration with one specific API Gateway?  
-... with without proper multi tenancy?  
+... without proper multi tenancy?  
 ... with poor automation capabilities?  
 ... which don't fit into your specifc API deployment workflow?  
 
