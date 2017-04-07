@@ -9,4 +9,4 @@ Tired of API Portals ....
 
 This is why **yaap** was born!
 
-Check [our wiki](https://github.com/broosha/yaap/wiki) for more documentation: 
+Check [our wiki](https://github.com/broosha/yaap/wiki) for more documentation.
