@@ -16,6 +16,18 @@ module.exports = function(Client) {
 	Client.disableRemoteMethodByName('updateAll');					// POST		/clients/update
 	Client.disableRemoteMethodByName('upsertWithWhere');			// POST		/clients/upsertWithWhere
 
+	// Disable some relational functions for clients
+	Client.disableRemoteMethodByName('prototype.__create__apis');		// POST		/clients/:id/apis
+	Client.disableRemoteMethodByName('prototype.__delete__apis');		// DELETE 	/clients/:id/apis
+	Client.disableRemoteMethodByName('prototype.__count__apis');		// GET 		/clients/:id/apis/count
+	Client.disableRemoteMethodByName('prototype.__findById__apis');		// GET		/clients/:id/apis/:apiId
+	Client.disableRemoteMethodByName('prototype.__updateById__apis');	// PUT		/clients/:id/apis/:apiId
+	Client.disableRemoteMethodByName('prototype.__destroyById__apis');	// DELETE	/clients/:id/apis/:apiId
+	Client.disableRemoteMethodByName('prototype.__exists__apis');		// HEAD 	/clients/:id/apis/rel/:apiId
+	Client.disableRemoteMethodByName('prototype.__link__apis');			// PUT		/clients/:id/apis/rel/:apiId
+	Client.disableRemoteMethodByName('prototype.__unlink__apis');		// DELETE	/clients/:id/apis/rel/:apiId
+
+
 
 	/**************************
 	*	Remote Hooks

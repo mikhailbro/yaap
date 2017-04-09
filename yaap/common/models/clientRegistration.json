@@ -24,12 +24,12 @@
     },
     "validations": [],
     "relations": {
-        "api": {
+        "apis": {
         	"type": "belongsTo",
         	"model": "Api",
         	"foreignKey": "apiId"
         },
-        "client": {
+        "clients": {
         	"type": "belongsTo",
         	"model": "Client",
         	"foreignKey": "clientId"

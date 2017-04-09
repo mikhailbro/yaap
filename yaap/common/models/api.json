@@ -63,7 +63,7 @@
 			"foreignKey": "apiId",
 			"through": "ClientRegistration"
 		},
-		"tenant": {
+		"tenants": {
 			"type": "belongsTo",
 			"model": "Tenant",
 			"foreignKey": "tenantId"
