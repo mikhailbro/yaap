@@ -1,9 +1,3 @@
 yaap/node_modules
 yaap_postman_collection_cloud9.json
-data/yaap.0
-data/yaap.ns
-data/local.0
-data/local.ns
-data/mongod.lock
-mongod
-mongodb.md
+data
