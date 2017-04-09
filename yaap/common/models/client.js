@@ -28,7 +28,6 @@ module.exports = function(Client) {
 	Client.disableRemoteMethodByName('prototype.__unlink__apis');		// DELETE	/clients/:id/apis/rel/:apiId
 
 
-
 	/**************************
 	*	Remote Hooks
 	***************************/
@@ -92,7 +91,6 @@ module.exports = function(Client) {
 	// PUT /clients/{id} and POST /clients/{id}/replace
 	// **************************************************
 	Client.beforeRemote('replaceById', function(context, unused, next) {
-		
 		// *** BEGIN reading the existing client byId and complete the input  ***
 		Client.findById(context.req.params.id, { fields: {name: true, contact: true, tenantId: true, createdBy: true, createdAt: true} }, function(err, client) {
 			if (err) {
@@ -309,10 +307,10 @@ module.exports = function(Client) {
 	    }
 	});	 
 	
+	
 	/**************************
 	*	Helper Functions
 	***************************/
-
 	function isTenantInArray(tenantId, tenants) {
 		var isOk = false;
 		for (var i = 0; i < tenants.length; i++) {
@@ -331,5 +329,4 @@ module.exports = function(Client) {
 		error.code = code;
 		return error;
 	}
-	
 };
