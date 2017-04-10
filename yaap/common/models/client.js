@@ -51,7 +51,7 @@ module.exports = function(Client) {
 		// *** BEGIN check the correctness of the tenantId entry ***
 		if (context.req.body.tenantId.length > 0 ) {
 			Client.app.models.Tenant.find({where: { id: context.req.body.tenantId}}, function(err, tenant) {
-				if (err || tenant.length != context.req.body.tenantId.length) {
+				if (err || tenant.length <= 0) {
 					next(createError(400, 'Tenant does not exist.', 'BAD_REQUEST'));
 					return;
 				} 
@@ -125,7 +125,7 @@ module.exports = function(Client) {
 		// *** BEGIN check the correctness of the tenantId entry ***
 		if (context.req.body.tenantId.length > 0 ) {
 			Client.app.models.Tenant.find({where: { id: context.req.body.tenantId}}, function(err, tenant) {
-				if (err || tenant.length != context.req.body.tenantId.length) {
+				if (err || tenant.length <= 0) {
 					next(createError(400, 'Tenant does not exist.', 'BAD_REQUEST'));
 					return;
 				} 
@@ -162,6 +162,7 @@ module.exports = function(Client) {
 		var creator = "";
 		var tenant = "";
 		
+		console.log("*** Bin in DELETE drin ***");
 		// *** BEGIN reading the existing client byId inkluding check of api relations ***
 		Client.findById(context.req.params.id, { fields: {tenantId: true, createdBy: true}, include: {relation: 'apis', scope: {limit: 1}} }, function(err, client) {
 			if (err) {
@@ -175,10 +176,12 @@ module.exports = function(Client) {
 			if (client.apis.count > 0) {
 				next(createError(409, 'This client is still registered by at least one API.', 'CONFLICT'));
 				return;
+			} else {
+				creator = client.createdBy;
+				tenant = client.tenantId;
+				next();
 			}
 			
-			creator = client.createdBy;
-			tenant = client.tenantId;
 		});
 		// *** END reading the existing client byId inkluding check of api relations ***
 		
