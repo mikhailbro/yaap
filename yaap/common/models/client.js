@@ -162,9 +162,9 @@ module.exports = function(Client) {
 		var creator = "";
 		var tenant = "";
 		
-		console.log("*** Bin in DELETE drin ***");
 		// *** BEGIN reading the existing client byId inkluding check of api relations ***
 		Client.findById(context.req.params.id, { fields: {tenantId: true, createdBy: true}, include: {relation: 'apis', scope: {limit: 1}} }, function(err, client) {
+			console.log("*** Bin in der ID Suche ***");
 			if (err) {
 				next(err);
 				return;
