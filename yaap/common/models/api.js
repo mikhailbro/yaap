@@ -245,7 +245,7 @@ module.exports = function(Api) {
 	Api.beforeRemote('prototype.__link__clients', function(context, unused, next) {
 		
 		// Note: Api must exist, this is checked by loopback when calling /apis/{id}/...
-
+    	
     	// Check if client exists (seems to be a bug in strongloop that this is not checked out-of-the-box)
 		Api.app.models.Client.findById(context.req.params.fk, function(err, client) {
 			if (err) {
