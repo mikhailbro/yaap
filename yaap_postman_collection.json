@@ -1626,7 +1626,7 @@
 					"response": []
 				},
 				{
-					"name": "ok (owner 1 & 2) - create api 1 (tenantId 1, audience 1 & 2)",
+					"name": "ok (admin) - get all tenants",
 					"event": [
 						{
 							"listen": "test",
@@ -1635,153 +1635,13 @@
 								"exec": [
 									"tests[\"Status Code\"] = responseCode.code === 200;",
 									"",
-									"var jsonData = JSON.parse(responseBody);",
-									"tests[\"body.name\"] = jsonData.name === \"myFirstApi\";",
-									"tests[\"body.state\"] = jsonData.state === \"enabled\";",
-									"tests[\"body.approvalWorkflow\"] = jsonData.approvalWorkflow === true;",
-									"tests[\"body.tenantId\"] = jsonData.tenantId === postman.getGlobalVariable(\"tenantId_1\");",
-									"",
-									"",
-									"postman.setGlobalVariable(\"apiId_1\", jsonData.id);"
+									""
 								]
 							}
 						}
 					],
 					"request": {
-						"url": "http://{{uriDomain}}/api/apis",
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "{{owner12Token}}",
-								"description": ""
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"name\": \"myFirstApi\",\n\t\"tenantId\": \"{{tenantId_1}}\",\n\t\"state\": \"enabled\",\n\t\"audience\": [\"{{tenantId_1}}\", \"{{tenantId_2}}\"],\n\t\"approvalWorkflow\": true,\n\t\"approvalEndpoint\": \"https://myhost/endpoint\",\n\t\"swagger\": {\n\t\t\"swagger\": \"2.0\",\n\t  \t\t\"info\": {\n\t  \t\t\t\"title\": \"myFirstApi\",\n\t  \t\t\t\"version\": \"1.0\"\n\t  \t},\n\t  \t\"paths\": {\n\t  \t\t\"/pets\": {\n\t    \t\t\"get\": {\n\t    \t\t\t\"responses\": {\n\t       \t\t\t\t\"200\": {\n\t       \t\t\t\t\t\"schema\": {\n\t           \t\t\t\t\t\"type\": \"array\",\n\t           \t\t\t\t\t\"items\": {\n\t          \t\t\t\t\t\t\"$ref\": \"#/definitions/pet\"\n\t           \t\t\t\t\t}\n\t       \t\t\t\t\t}\n\t       \t\t\t\t}\n\t    \t\t\t}\n\t    \t\t}\n\t\t\t}\n\t\t}\n\t}\n}"
-						},
-						"description": ""
-					},
-					"response": []
-				},
-				{
-					"name": "ok (admin) - create api 2 (tenantId 2, audience 2, approvalWorkflow default)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"tests[\"Status Code\"] = responseCode.code === 200;",
-									"",
-									"var jsonData = JSON.parse(responseBody);",
-									"tests[\"body.name\"] = jsonData.name === \"mySecondApi\";",
-									"tests[\"body.state\"] = jsonData.state === \"enabled\";",
-									"tests[\"body.approvalWorkflow\"] = jsonData.approvalWorkflow === false;",
-									"tests[\"body.tenantId\"] = jsonData.tenantId === postman.getGlobalVariable(\"tenantId_2\");",
-									"",
-									"",
-									"postman.setGlobalVariable(\"apiId_2\", jsonData.id);"
-								]
-							}
-						}
-					],
-					"request": {
-						"url": "http://{{uriDomain}}/api/apis",
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "{{adminToken}}",
-								"description": ""
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"name\": \"mySecondApi\",\n\t\"tenantId\": \"{{tenantId_2}}\",\n\t\"state\": \"enabled\",\n\t\"audience\": [\"{{tenantId_2}}\"],\n\t\"swagger\": {\n\t\t\"swagger\": \"2.0\",\n\t  \t\t\"info\": {\n\t  \t\t\t\"title\": \"myFirstApi\",\n\t  \t\t\t\"version\": \"1.0\"\n\t  \t},\n\t  \t\"paths\": {\n\t  \t\t\"/pets\": {\n\t    \t\t\"get\": {\n\t    \t\t\t\"responses\": {\n\t       \t\t\t\t\"200\": {\n\t       \t\t\t\t\t\"schema\": {\n\t           \t\t\t\t\t\"type\": \"array\",\n\t           \t\t\t\t\t\"items\": {\n\t          \t\t\t\t\t\t\"$ref\": \"#/definitions/pet\"\n\t           \t\t\t\t\t}\n\t       \t\t\t\t\t}\n\t       \t\t\t\t}\n\t    \t\t\t}\n\t    \t\t}\n\t\t\t}\n\t\t}\n\t}\n}"
-						},
-						"description": ""
-					},
-					"response": []
-				},
-				{
-					"name": "ok (owner 1) - create api 3 (tenantId 1, no audience, default state)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"tests[\"Status Code\"] = responseCode.code === 200;",
-									"",
-									"var jsonData = JSON.parse(responseBody);",
-									"tests[\"body.name\"] = jsonData.name === \"myThirdApi\";",
-									"tests[\"body.state\"] = jsonData.state === \"enabled\";",
-									"tests[\"body.approvalWorkflow\"] = jsonData.approvalWorkflow === true;",
-									"tests[\"body.tenantId\"] = jsonData.tenantId === postman.getGlobalVariable(\"tenantId_1\");",
-									"",
-									"postman.setGlobalVariable(\"apiId_3\", jsonData.id);"
-								]
-							}
-						}
-					],
-					"request": {
-						"url": "http://{{uriDomain}}/api/apis",
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "{{owner1Ttoken}}",
-								"description": ""
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"name\": \"myThirdApi\",\n\t\"tenantId\": \"{{tenantId_1}}\",\n\t\"approvalWorkflow\": true,\n\t\"approvalEndpoint\": \"https://myhost/endpoint\",\n\t\"swagger\": {\n\t\t\"swagger\": \"2.0\",\n\t  \t\t\"info\": {\n\t  \t\t\t\"title\": \"myFirstApi\",\n\t  \t\t\t\"version\": \"1.0\"\n\t  \t},\n\t  \t\"paths\": {\n\t  \t\t\"/pets\": {\n\t    \t\t\"get\": {\n\t    \t\t\t\"responses\": {\n\t       \t\t\t\t\"200\": {\n\t       \t\t\t\t\t\"schema\": {\n\t           \t\t\t\t\t\"type\": \"array\",\n\t           \t\t\t\t\t\"items\": {\n\t          \t\t\t\t\t\t\"$ref\": \"#/definitions/pet\"\n\t           \t\t\t\t\t}\n\t       \t\t\t\t\t}\n\t       \t\t\t\t}\n\t    \t\t\t}\n\t    \t\t}\n\t\t\t}\n\t\t}\n\t}\n}"
-						},
-						"description": ""
-					},
-					"response": []
-				},
-				{
-					"name": "ok (admin) - get all apis",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"tests[\"Status Code\"] = responseCode.code === 200;",
-									"",
-									"var jsonData = JSON.parse(responseBody);",
-									"tests[\"body.name\"] = jsonData[0].name === \"myFirstApi\";",
-									"tests[\"body.tenantId\"] = jsonData[0].tenantId === postman.getGlobalVariable(\"tenantId_1\");",
-									"tests[\"body.name\"] = jsonData[1].name === \"mySecondApi\";",
-									"tests[\"body.tenantId\"] = jsonData[1].tenantId === postman.getGlobalVariable(\"tenantId_2\");",
-									"tests[\"body.name\"] = jsonData[2].name === \"myThirdApi\";",
-									"tests[\"body.tenantId\"] = jsonData[2].tenantId === postman.getGlobalVariable(\"tenantId_1\");"
-								]
-							}
-						}
-					],
-					"request": {
-						"url": "http://{{uriDomain}}/api/apis?filter[order]=name ASC",
+						"url": "http://{{uriDomain}}/api/tenants?filter[order]=name ASC",
 						"method": "GET",
 						"header": [
 							{
@@ -1796,7 +1656,7 @@
 					"response": []
 				},
 				{
-					"name": "ok (admin) - create client  for tenant 1",
+					"name": "ok (consumer 1 & 2) - create client  1 for tenant 1",
 					"event": [
 						{
 							"listen": "test",
@@ -1806,10 +1666,54 @@
 									"tests[\"Status Code\"] = responseCode.code === 200;",
 									"",
 									"var jsonData = JSON.parse(responseBody);",
-									"tests[\"body.name\"] = jsonData.name === \"CentraSite\";",
+									"tests[\"body.id\"] = jsonData.name === \"APP-1\";",
+									"tests[\"body.name\"] = jsonData.name === \"APPL-ONE\";",
 									"tests[\"body.tenantId\"] = jsonData.tenantId === postman.getGlobalVariable(\"tenantId_1\");",
 									"",
 									"postman.setGlobalVariable(\"clientId_1\", jsonData.id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://{{uriDomain}}/api/clients",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{consumer12Token}}",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"id\": \"APP-1\",\r\n  \"tenantId\": \"{{tenantId_1}}\",\r\n  \"name\": \"APPL-ONE\",\r\n  \"contact\": \"WGR-BOX ASE\",\r\n  \"updatedBy\": \"C938378\",\r\n  \"createdBy\": \"C938378\",\r\n  \"createdAt\": \"2017-04-10T15:53:40.497Z\",\r\n  \"updatedAt\": \"2017-04-10T15:53:40.497Z\"\r\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "ok (admin) - create client 2 for tenant 2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status Code\"] = responseCode.code === 200;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.id\"] = jsonData.name === \"APP-2\";",
+									"tests[\"body.name\"] = jsonData.name === \"APPL-TWO\";",
+									"tests[\"body.tenantId\"] = jsonData.tenantId === postman.getGlobalVariable(\"tenantId_2\");",
+									"",
+									"postman.setGlobalVariable(\"clientId_2\", jsonData.id);"
 								]
 							}
 						}
@@ -1831,7 +1735,172 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"id\": \"APP-656\",\r\n  \"tenantId\": \"{{tenantId_1}}\",\r\n  \"name\": \"CentraSite\",\r\n  \"contact\": \"WGR-BOX ASE\",\r\n  \"updatedBy\": \"C938378\",\r\n  \"createdBy\": \"C938378\",\r\n  \"createdAt\": \"2017-04-10T15:53:40.497Z\",\r\n  \"updatedAt\": \"2017-04-10T15:53:40.497Z\"\r\n}"
+							"raw": "{\r\n  \"id\": \"APP-2\",\r\n  \"tenantId\": \"{{tenantId_2}}\",\r\n  \"name\": \"APPL-TWO\",\r\n  \"contact\": \"WGR-BOX ASE\",\r\n  \"updatedBy\": \"C938378\",\r\n  \"createdBy\": \"C938378\",\r\n  \"createdAt\": \"2017-04-10T15:53:40.497Z\",\r\n  \"updatedAt\": \"2017-04-10T15:53:40.497Z\"\r\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "ok (consumer 3) - create client  3 for tenant 3",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status Code\"] = responseCode.code === 200;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.id\"] = jsonData.name === \"APP-3\";",
+									"tests[\"body.name\"] = jsonData.name === \"APPL-THREE\";",
+									"tests[\"body.tenantId\"] = jsonData.tenantId === postman.getGlobalVariable(\"tenantId_3\");",
+									"",
+									"postman.setGlobalVariable(\"clientId_3\", jsonData.id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://{{uriDomain}}/api/clients",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{consumer3Token}}",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"id\": \"APP-3\",\r\n  \"tenantId\": \"{{tenantId_3}}\",\r\n  \"name\": \"APPL-THREE\",\r\n  \"contact\": \"WGR-BOX ASE\",\r\n  \"updatedBy\": \"C938378\",\r\n  \"createdBy\": \"C938378\",\r\n  \"createdAt\": \"2017-04-10T15:53:40.497Z\",\r\n  \"updatedAt\": \"2017-04-10T15:53:40.497Z\"\r\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "ok (consumer 2) - create client  4 for public",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status Code\"] = responseCode.code === 200;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.id\"] = jsonData.name === \"APP-4\";",
+									"tests[\"body.name\"] = jsonData.name === \"APPL-FOUR\";",
+									"",
+									"postman.setGlobalVariable(\"clientId_4\", jsonData.id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://{{uriDomain}}/api/clients",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{consumer2Token}}",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"id\": \"APP-4\",\r\n  \"name\": \"APPL-FOUR\",\r\n  \"contact\": \"WGR-BOX ASE\",\r\n  \"updatedBy\": \"C938378\",\r\n  \"createdBy\": \"C938378\",\r\n  \"createdAt\": \"2017-04-10T15:53:40.497Z\",\r\n  \"updatedAt\": \"2017-04-10T15:53:40.497Z\"\r\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "nok (consumer 2) - create client  for tenant 3",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status Code\"] = responseCode.code === 400;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.name\"] = jsonData.error.name === \"Error\";",
+									"tests[\"body.message\"] = jsonData.error.message === \"Wrong tenantId in request body.\";"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://{{uriDomain}}/api/clients",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{consumer2Token}}",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"id\": \"APP-5\",\r\n  \"name\": \"APPL-FIVE\",\r\n  \"tenantId\": \"{{tenantId_3}}\",\r\n  \"contact\": \"WGR-BOX ASE\",\r\n  \"updatedBy\": \"C938378\",\r\n  \"createdBy\": \"C938378\",\r\n  \"createdAt\": \"2017-04-10T15:53:40.497Z\",\r\n  \"updatedAt\": \"2017-04-10T15:53:40.497Z\"\r\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "nok (consumer 3) - create client  without client name",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status Code\"] = responseCode.code === 422;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.message\"] = jsonData.error.message === \"The `Client` instance is not valid. Details: `name` can't be blank (value: undefined).\";",
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://{{uriDomain}}/api/clients",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{consumer3Token}}",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"id\": \"APP-5\",\r\n  \"tenantId\": \"{{tenantId_3}}\",\r\n  \"contact\": \"WGR-BOX ASE\",\r\n  \"updatedBy\": \"C938378\",\r\n  \"createdBy\": \"C938378\",\r\n  \"createdAt\": \"2017-04-10T15:53:40.497Z\",\r\n  \"updatedAt\": \"2017-04-10T15:53:40.497Z\"\r\n}"
 						},
 						"description": ""
 					},
@@ -1848,7 +1917,7 @@
 									"tests[\"Status Code\"] = responseCode.code === 200;",
 									"",
 									"var jsonData = JSON.parse(responseBody);",
-									"tests[\"body.name\"] = jsonData[0].name === \"CentraSite\";",
+									"tests[\"body.name\"] = jsonData[0].name === \"APPL-ONE\";",
 									"tests[\"body.tenantId\"] = jsonData[0].tenantId === postman.getGlobalVariable(\"tenantId_1\");",
 									""
 								]
@@ -1856,7 +1925,7 @@
 						}
 					],
 					"request": {
-						"url": "http://{{uriDomain}}/api/clients?filter[order]=name ASC",
+						"url": "http://{{uriDomain}}/api/clients?filter[order]=id ASC",
 						"method": "GET",
 						"header": [
 							{
@@ -1871,7 +1940,225 @@
 					"response": []
 				},
 				{
-					"name": "ok (admin) - client 1",
+					"name": "ok (consumer 3) - get my clients",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status Code\"] = responseCode.code === 200;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.name\"] = jsonData[0].name === \"APPL-THREE\";",
+									"tests[\"body.tenantId\"] = jsonData[0].tenantId === postman.getGlobalVariable(\"tenantId_3\");",
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://{{uriDomain}}/api/clients?filter[order]=id ASC",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{consumer3Token}}",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "nok (consumer 1 & 2) - update client 1 with not a creator",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status Code\"] = responseCode.code === 403;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.name\"] = jsonData.error.name === \"Error\";",
+									"tests[\"body.message\"] = jsonData.error.message === \"No permissions for this action. You must be creator of this client entry.\";"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://{{uriDomain}}/api/clients/{{clientId_1}}",
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{consumer12Token}}",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"id\": \"APP-1\",\r\n  \"tenantId\": \"{{tenantId_1}}\",\r\n  \"name\": \"APPL-ONE\",\r\n  \"contact\": \"WGR-BOX ASE\",\r\n  \"updatedBy\": \"C938378\",\r\n  \"createdBy\": \"the-creator\",\r\n  \"createdAt\": \"2017-04-10T15:53:40.497Z\",\r\n  \"updatedAt\": \"2017-04-10T15:53:40.497Z\"\r\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "nok (consumer 1 & 2) - update client 3 with wrong tenant",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status Code\"] = responseCode.code === 400;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.name\"] = jsonData.error.name === \"Error\";",
+									"tests[\"body.message\"] = jsonData.error.message === \"Wrong tenantId in request body.\";"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://{{uriDomain}}/api/clients/{{clientId_1}}",
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{consumer12Token}}",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"id\": \"APP-1\",\r\n  \"tenantId\": \"{{tenantId_3}}\",\r\n  \"name\": \"APPL-THREE\",\r\n  \"contact\": \"WGR-BOX ASE\",\r\n  \"updatedBy\": \"12345678890\",\r\n  \"createdBy\": \"C938378\",\r\n  \"createdAt\": \"2017-04-10T15:53:40.497Z\",\r\n  \"updatedAt\": \"2017-04-10T15:53:40.497Z\"\r\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "ok (consumer 1 & 2) - update client 1 - client contact",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status Code\"] = responseCode.code === 200;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.id\"] = jsonData.name === \"APP-1\";",
+									"tests[\"body.contact\"] = jsonData.name === \"AXA-TECH BOX\";",
+									"tests[\"body.tenantId\"] = jsonData.tenantId === postman.getGlobalVariable(\"tenantId_1\");"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://{{uriDomain}}/api/clients/{{clientId_1}}",
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{consumer12Token}}",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"id\": \"APP-1\",\r\n  \"tenantId\": \"{{tenantId_1}}\",\r\n  \"name\": \"APPL-ONE\",\r\n  \"contact\": \"AXA-TECH BOX\",\r\n  \"updatedBy\": \"wer auch immer\",\r\n  \"createdBy\": \"1234567890\",\r\n  \"createdAt\": \"2017-04-10T16:53:40.497Z\",\r\n  \"updatedAt\": \"2017-04-10T15:53:40.497Z\"\r\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "nok (consumer 3) - client not found",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status Code\"] = responseCode.code === 404;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.name\"] = jsonData.error.name === \"Error\";",
+									"tests[\"body.message\"] = jsonData.error.message === \"Unknown client id: APP-5\";"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://{{uriDomain}}/api/clients/APP-5",
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{consumer3Token}}",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "nok (consumer 3) - client 1 from tenant 1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status Code\"] = responseCode.code === 403;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.name\"] = jsonData.error.name === \"Error\";",
+									"tests[\"body.message\"] = jsonData.error.message === \"Wrong permissions for this tenant.\";"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://{{uriDomain}}/api/clients/{{clientId_1}}",
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{consumer3Token}}",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "ok (consumer 1) - client 1",
 					"event": [
 						{
 							"listen": "test",
@@ -1883,13 +2170,46 @@
 									"var jsonData = JSON.parse(responseBody);",
 									"tests[\"body.count\"] = jsonData.count === 1;",
 									"",
-									"postman.clearGlobalVariable(\"apiId_1\");"
+									"postman.clearGlobalVariable(\"clientId_1\");"
 								]
 							}
 						}
 					],
 					"request": {
 						"url": "http://{{uriDomain}}/api/clients/{{clientId_1}}",
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{consumer1Token}}",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "ok (admin) - client 2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"DELETE - Status Code\"] = responseCode.code === 200;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.count\"] = jsonData.count === 1;",
+									"",
+									"postman.clearGlobalVariable(\"clientId_2\");"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://{{uriDomain}}/api/clients/{{clientId_2}}",
 						"method": "DELETE",
 						"header": [
 							{
@@ -1904,7 +2224,7 @@
 					"response": []
 				},
 				{
-					"name": "ok (owner 1 & 2) - api 3",
+					"name": "ok (admin) - client 3",
 					"event": [
 						{
 							"listen": "test",
@@ -1916,18 +2236,18 @@
 									"var jsonData = JSON.parse(responseBody);",
 									"tests[\"body.count\"] = jsonData.count === 1;",
 									"",
-									"postman.clearGlobalVariable(\"apiId_3\");"
+									"postman.clearGlobalVariable(\"clientId_3\");"
 								]
 							}
 						}
 					],
 					"request": {
-						"url": "http://{{uriDomain}}/api/apis/{{apiId_3}}",
+						"url": "http://{{uriDomain}}/api/clients/{{clientId_3}}",
 						"method": "DELETE",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "{{owner12Token}}",
+								"value": "{{adminToken}}",
 								"description": ""
 							}
 						],
@@ -1937,7 +2257,7 @@
 					"response": []
 				},
 				{
-					"name": "ok (owner 1 & 2) - api 2",
+					"name": "ok (admin) - client 4",
 					"event": [
 						{
 							"listen": "test",
@@ -1949,46 +2269,13 @@
 									"var jsonData = JSON.parse(responseBody);",
 									"tests[\"body.count\"] = jsonData.count === 1;",
 									"",
-									"postman.clearGlobalVariable(\"apiId_2\");"
+									"postman.clearGlobalVariable(\"clientId_4\");"
 								]
 							}
 						}
 					],
 					"request": {
-						"url": "http://{{uriDomain}}/api/apis/{{apiId_2}}",
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "{{owner12Token}}",
-								"description": ""
-							}
-						],
-						"body": {},
-						"description": ""
-					},
-					"response": []
-				},
-				{
-					"name": "ok (admin) - api 1",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"tests[\"DELETE - Status Code\"] = responseCode.code === 200;",
-									"",
-									"var jsonData = JSON.parse(responseBody);",
-									"tests[\"body.count\"] = jsonData.count === 1;",
-									"",
-									"postman.clearGlobalVariable(\"apiId_1\");"
-								]
-							}
-						}
-					],
-					"request": {
-						"url": "http://{{uriDomain}}/api/apis/{{apiId_1}}",
+						"url": "http://{{uriDomain}}/api/clients/{{clientId_4}}",
 						"method": "DELETE",
 						"header": [
 							{
@@ -2089,6 +2376,68 @@
 					"request": {
 						"url": "http://{{uriDomain}}/api/tenants/{{tenantId_1}}",
 						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{adminToken}}",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "ok (admin) - get all clients",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status Code\"] = responseCode.code === 200;",
+									"",
+									"",
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://{{uriDomain}}/api/clients/",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{adminToken}}",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "ok (admin) - get all tenants",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status Code\"] = responseCode.code === 200;",
+									"",
+									"",
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://{{uriDomain}}/api/tenants/",
+						"method": "GET",
 						"header": [
 							{
 								"key": "Authorization",
