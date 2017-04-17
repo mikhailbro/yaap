@@ -49,10 +49,10 @@ module.exports = function(Client) {
 		// *** END input completion ***
 		
 		// *** BEGIN check the correctness of the tenantId entry ***
-		if (context.req.body.tenantId.length > 0 ) {
+		if (context.req.body.tenantId && context.req.body.tenantId.length > 0 ) {
 			Client.app.models.Tenant.find({where: { id: context.req.body.tenantId}}, function(err, tenant) {
 				if (err || tenant.length <= 0) {
-					next(createError(400, 'Tenant does not exist.', 'BAD_REQUEST'));
+					next(createError(404, 'Client tenant does not exist.', 'NOT_FOUND'));
 					return;
 				} 
 	  		});
@@ -62,7 +62,7 @@ module.exports = function(Client) {
   		// *** BEGIN authorization ***
 		if (!context.req.user.isAdmin) {
 	    	// Check that the filled tenantId from request body matches one of tenants from apiConsumer role from token
-			if (context.req.body.tenantId.length > 0 ) {
+			if (context.req.body.tenantId && context.req.body.tenantId.length > 0 ) {
 				if (!isTenantInArray(context.req.body.tenantId, context.req.user.apiConsumerTenants)) {
 					next(createError(400, 'Wrong tenantId in request body.', 'BAD_REQUEST'));
 					return;
@@ -71,19 +71,7 @@ module.exports = function(Client) {
 	    } 
 		// *** END authorization ***
 		
-	    // *** BEGIN input validation ***
-	    // client name and contact must be filled
-		if (!context.req.body.name || context.req.body.name.length == 0 ) {
-			next(createError(400, 'Input validation failed: client name is empty', 'BAD_REQUEST'));
-			return;	
-		}
-		if (!context.req.body.contact || context.req.body.contact.length == 0 ) {
-			next(createError(400, 'Input validation failed: client contact is empty', 'BAD_REQUEST'));
-			return;	
-		} else {
-			next();
-		}
-		// *** END input validation ***
+		next();
 	});
 	
 	
@@ -91,6 +79,30 @@ module.exports = function(Client) {
 	// PUT /clients/{id} and POST /clients/{id}/replace
 	// **************************************************
 	Client.beforeRemote('replaceById', function(context, unused, next) {
+		 
+		var sub = context.req.user.sub;
+		context.req.body.updatedBy = sub;
+		
+		var jsonDateTime = (new Date()).toJSON();
+		context.req.body.updatedAt = jsonDateTime;
+	
+		// *** BEGIN authorization ***
+		if (!context.req.user.isAdmin) {
+	    	// Check that the filled tenantId from request body matches one of tenants from apiConsumer role from token
+			if (context.req.body.tenantId && context.req.body.tenantId.length > 0 ) {
+				if (!isTenantInArray(context.req.body.tenantId, context.req.user.apiConsumerTenants)) {
+					next(createError(400, 'Wrong tenantId in request body.', 'BAD_REQUEST'));
+					return;
+				}
+			}
+			// Check that the subject is the same person, which has created this client:
+			if (context.req.user.sub != context.req.body.createdBy) {
+				next(createError(403, 'No permissions for this action. You must be creator of this client entry.', 'FORBIDDEN'));
+				return;
+			} 
+	    } 
+		// *** END authorization ***
+		
 		// *** BEGIN reading the existing client byId and complete the input  ***
 		Client.findById(context.req.params.id, { fields: {name: true, contact: true, tenantId: true, createdBy: true, createdAt: true} }, function(err, client) {
 			if (err) {
@@ -101,57 +113,10 @@ module.exports = function(Client) {
 				next(createError(404, 'Unknown "client" id "' + context.req.params.id + '".', 'MODEL_NOT_FOUND'));
 				return;
 			}
-			
-			var jsonDateTime = (new Date()).toJSON();
-			context.req.body.updatedAt = jsonDateTime;
-			context.req.body.createdAt = client.createdAt;
-			
-			var sub = context.req.user.sub;
-			context.req.body.updatedBy = sub;
-			context.req.body.createdBy = client.createdBy;
-			
-			if (!context.req.body.name) {
-				context.req.body.name = client.name;	
-			}
-			if (!context.req.body.contact) {
-				context.req.body.name = client.contact;	
-			}
-			if (client.tenantId.length > 0 && (!context.req.body.tenantId || context.req.body.tenantId.length == 0 )) {
-				context.req.body.tenantId = client.tenantId;	
-			}
 		});
 		// *** END reading the existing client byId and complete the input ***
-		
-		// *** BEGIN check the correctness of the tenantId entry ***
-		if (context.req.body.tenantId.length > 0 ) {
-			Client.app.models.Tenant.find({where: { id: context.req.body.tenantId}}, function(err, tenant) {
-				if (err || tenant.length <= 0) {
-					next(createError(400, 'Tenant does not exist.', 'BAD_REQUEST'));
-					return;
-				} 
-	  		});
-		}
-  		// *** END check the correctness of the tenantId entry ***
-  			
-  		// *** BEGIN authorization ***
-		if (!context.req.user.isAdmin) {
-	    	// Check that the filled tenantId from request body matches one of tenants from apiConsumer role from token
-			if (context.req.body.tenantId.length > 0 ) {
-				if (!isTenantInArray(context.req.body.tenantId, context.req.user.apiConsumerTenants)) {
-					next(createError(400, 'Wrong tenantId in request body.', 'BAD_REQUEST'));
-					return;
-				}
-			}
-			// Check that the subject is the same person, which has created this client:
-			if (context.req.user.sub != context.req.body.createdBy) {
-				next(createError(403, 'No permissions for this action. You must be creator of this client entry.', 'FORBIDDEN'));
-				return;
-			} else {
-				next();
-			}
-	    } 
-		// *** END authorization ***
-		
+
+		next();
 	});
 
 	
@@ -163,14 +128,13 @@ module.exports = function(Client) {
 		var tenant = "";
 		
 		// *** BEGIN reading the existing client byId inkluding check of api relations ***
-		Client.findById(context.req.params.id, { fields: {tenantId: true, createdBy: true}, include: {relation: 'apis', scope: {limit: 1}} }, function(err, client) {
-			console.log("*** Bin in der ID Suche ***");
+		Client.findById(context.req.params.id, { include: {relation: 'apis', scope: {limit: 1}} }, function(err, client) {
 			if (err) {
 				next(err);
 				return;
 			}
 			if (!client) {
-				next(createError(404, 'Unknown "client" id "' + context.req.params.id + '".', 'MODEL_NOT_FOUND'));
+				next(createError(404, 'Unknown client id: ' + context.req.params.id, 'MODEL_NOT_FOUND'));
 				return;
 			}
 			if (client.apis.count > 0) {
@@ -179,31 +143,28 @@ module.exports = function(Client) {
 			} else {
 				creator = client.createdBy;
 				tenant = client.tenantId;
-				next();
+				  		
+				// *** BEGIN authorization ***
+				if (!context.req.user.isAdmin) {
+			    	// Check that the filled tenantId from request body matches one of tenants from apiConsumer role from token
+					if (tenant.length > 0 ) {
+						if (!isTenantInArray(tenant, context.req.user.apiConsumerTenants)) {
+							next(createError(403, 'Wrong permissions for this tenant.', 'FORBIDDEN'));
+							return;
+						} 
+						// Check that the subject is the same person, which has created this client:
+					} else if (context.req.user.sub != creator) {
+						next(createError(403, 'No permissions for this action. You must be creator of this client entry.', 'FORBIDDEN'));
+						return;
+					} 
+			    } 
+				// *** END authorization ***
 			}
 			
 		});
 		// *** END reading the existing client byId inkluding check of api relations ***
 		
-		
-  		// *** BEGIN authorization ***
-		if (!context.req.user.isAdmin) {
-	    	// Check that the filled tenantId from request body matches one of tenants from apiConsumer role from token
-			if (tenant.length > 0 ) {
-				if (!isTenantInArray(tenant, context.req.user.apiConsumerTenants)) {
-					next(createError(403, 'Wrong permissions for this tenant.', 'FORBIDDEN'));
-					return;
-				}
-			}
-			// Check that the subject is the same person, which has created this client:
-			if (context.req.user.sub != creator) {
-				next(createError(403, 'No permissions for this action. You must be creator of this client entry.', 'FORBIDDEN'));
-				return;
-			} else {
-				next();
-			}
-	    } 
-		// *** END authorization ***
+		next();
 	});	
 	
 	
@@ -233,6 +194,7 @@ module.exports = function(Client) {
 				   									]
 											};
 		    }
+			console.log(context.args.filter.where);
 			next();
 	    }  
 	    
