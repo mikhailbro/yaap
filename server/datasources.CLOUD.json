@@ -1,0 +1,12 @@
+{
+  "mongodb": {
+    "host": "ds155509.mlab.com",
+    "port": 55509,
+    "url": false,
+    "database": "yaap",
+    "password": "myVerySecretDb99!",
+    "name": "mongodb",
+    "user": "yaap_user",
+    "connector": "mongodb"
+  }
+}
