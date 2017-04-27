@@ -56,6 +56,8 @@ module.exports = function() {
     	// No token, public access
     	req.user.isAuthenticated = false;
     	req.user.isAdmin = false;
+		req.user.apiOwnerTenants = [];
+		req.user.apiConsumerTenants = [];
     	next();
     }
 
