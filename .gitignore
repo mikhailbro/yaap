@@ -19,7 +19,7 @@ docs/c9
 .project
 .strong-pm
 coverage
-node_modules
+yaap/node_modules
 npm-debug.log
 
 # Elastic Beanstalk Files
