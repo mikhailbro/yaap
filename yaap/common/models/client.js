@@ -177,6 +177,10 @@ module.exports = function(Client) {
 	    } else {
 	    	if (!context.args.filter || !context.args.filter.where) {
 		    	// No 'where' filter in request, add where clause to check audience
+				
+				if (!context.args.filter) {
+					context.args.filter = {};
+				}
 		    	context.args.filter.where = { or:	[
 		    											{ tenantId: { inq: context.req.user.apiConsumerTenants }}, 
 		    											{ createdBy: context.req.user.sub }

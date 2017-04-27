@@ -75,6 +75,10 @@ module.exports = function(Api) {
 	    } else {
 	    	if (!context.args.filter || !context.args.filter.where) {
 		    	// No 'where' filter in request, add where clause to check audience
+				
+				if (!context.args.filter) {
+					context.args.filter = {};
+				}
 		    	context.args.filter.where = {or: [{audience: { inq: context.req.user.apiConsumerTenants}}, {audience: []}]};
 		    } else {
 		    	// 'where' clause in request, add AND clause to check audience
