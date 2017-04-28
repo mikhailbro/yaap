@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = function(Client) {
-	
+	var pem = require('pem');
 	/**************************
 	*	Disable REST functions
 	***************************/
@@ -48,7 +48,7 @@ module.exports = function(Client) {
 		context.req.body.createdBy = sub;
 		context.req.body.updatedBy = sub;
 		// *** END input completion ***
-		
+
 		// *** BEGIN check the correctness of the tenantId entry ***
 		if (context.req.body.tenantId && context.req.body.tenantId.length > 0 ) {
 			Client.app.models.Tenant.find({where: { id: context.req.body.tenantId}}, function(err, tenant) {
@@ -60,6 +60,16 @@ module.exports = function(Client) {
 		}
   		// *** END check the correctness of the tenantId entry ***
   		
+  		// Validate x509CertificateChain (optional)
+  		console.log(context.req.body.x509CertificateChain);
+  		console.log(context.req.body.x509CertificateChain.length);
+  		if (context.req.body.x509CertificateChain) {
+  			if (context.req.body.x509CertificateChain.length < 2) {
+  				next(createError(400, 'Certificate chain must at least have two certificates.', 'BAD_REQUEST'));
+				return;
+  			}
+  		}
+
   		// *** BEGIN authorization ***
 		if (!context.req.user.isAdmin) {
 	    	// Check that the filled tenantId from request body matches one of tenants from apiConsumer role from token
@@ -81,11 +91,7 @@ module.exports = function(Client) {
 	// **************************************************
 	Client.beforeRemote('replaceById', function(context, unused, next) {
 		 
-		var sub = context.req.user.sub;
-		context.req.body.updatedBy = sub;
-		
-		var jsonDateTime = (new Date()).toJSON();
-		context.req.body.updatedAt = jsonDateTime;
+		context.req.body.updatedBy = context.req.user.sub;
 	
 		// *** BEGIN authorization ***
 		if (!context.req.user.isAdmin) {
@@ -114,10 +120,11 @@ module.exports = function(Client) {
 				next(createError(404, 'Unknown "client" id "' + context.req.params.id + '".', 'MODEL_NOT_FOUND'));
 				return;
 			}
+
+			next();
 		});
 		// *** END reading the existing client byId and complete the input ***
 
-		next();
 	});
 
 	

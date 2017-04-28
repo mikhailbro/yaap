@@ -35,7 +35,7 @@
 			"required": true
 		},
 		"x509CertificateChain": {
-			"type": "string",
+			"type": ["string"],
 			"required": false
 		},
 		"updatedBy": {
