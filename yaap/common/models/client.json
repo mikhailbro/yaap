@@ -17,6 +17,15 @@
 	  		"type": "string",
 	  		"required": false
 		},
+		"secret": {
+			"type": "string",
+			"required": false
+		},
+		"type": {
+			"type": "string",
+			"required": true,
+			"enum": ["public", "confidential"]
+		},
 		"name": {
 			"type": "string",
 			"required": true
@@ -24,6 +33,10 @@
 		"contact": {
 			"type": "string",
 			"required": true
+		},
+		"x509CertificateChain": {
+			"type": "string",
+			"required": false
 		},
 		"updatedBy": {
 			"type": "string",

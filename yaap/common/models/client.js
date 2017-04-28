@@ -29,6 +29,12 @@ module.exports = function(Client) {
 
 
 	/**************************
+	*	Validation Checks
+	***************************/
+	Client.validatesInclusionOf('type', {in: ['public', 'confidential']});
+	
+
+	/**************************
 	*	Remote Hooks
 	***************************/
 	
@@ -37,11 +43,6 @@ module.exports = function(Client) {
 	// **************************************************
 	Client.beforeRemote('create', function(context, unused, next) {
 		// *** BEGIN input completion ***
-		// ignore input in 'createdAt' and 'updatedAt' and set current time instead
-		var jsonDateTime = (new Date()).toJSON();
-		context.req.body.createdAt = jsonDateTime;
-		context.req.body.updatedAt = jsonDateTime;
-		
 		// ignore input in 'createdBy' and 'updatedBy' and set current subject instead
 		var sub = context.req.user.sub;
 		context.req.body.createdBy = sub;
@@ -58,7 +59,7 @@ module.exports = function(Client) {
 	  		});
 		}
   		// *** END check the correctness of the tenantId entry ***
-  			
+  		
   		// *** BEGIN authorization ***
 		if (!context.req.user.isAdmin) {
 	    	// Check that the filled tenantId from request body matches one of tenants from apiConsumer role from token
@@ -160,11 +161,13 @@ module.exports = function(Client) {
 			    } 
 				// *** END authorization ***
 			}
+
+			next();
 			
 		});
 		// *** END reading the existing client byId inkluding check of api relations ***
 		
-		next();
+		
 	});	
 	
 	
