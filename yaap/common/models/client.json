@@ -19,7 +19,8 @@
 		},
 		"secret": {
 			"type": "string",
-			"required": false
+			"required": false,
+			"defaultFn": "uuidv4"
 		},
 		"type": {
 			"type": "string",
@@ -47,6 +48,7 @@
 			"required": true
 		}
 	},
+	"protected": ["secret"],
 	"validations": [],
 	"relations": {
 		"apis": {

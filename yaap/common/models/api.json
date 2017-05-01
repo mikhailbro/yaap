@@ -36,16 +36,34 @@
 		  	"enum": ["enabled", "disabled", "deprecated"],
 		  	"default": "enabled"
 		},
-		"approvalWorkflow": {
-		  	"type": "boolean",
-		  	"description": "Needed for for client registrations",
-		  	"required": true,
-		  	"default": false
-		},
-		"approvalEndpoint": {
-		  	"type": "string",
-		  	"description": "Mandatory if approval-workflow is true"
-		},
+		"clientRegistrationWebhook": {
+		  	"type": "object",
+		  	"description": "Webhook which is called when a new client registers to the API.",
+		  	"required": false,
+		  	"properties": {
+		  		"url": {
+		  			"type": ["string"],
+		  			"required": true,
+		  			"description": "List of URLs where webhook request are sent to."
+		  		},
+		  		"securityToken": {
+		  			"type": "object",
+		  			"required": false,
+		  			"properties": {
+		  				"httpHeader": {
+		  					"type": "string",
+		  					"required": true,
+		  					"description": "Name of the HTTP header where the security token must be put."
+		  				},
+		  				"token": {
+		  					"type": "string",
+		  					"required": true,
+		  					"description": "Security token to be put in the HTTP header."
+		  				}
+		  			}
+		  		}
+		  	}	
+		 },
 		"updatedBy": {
 			"type": "string",
 			"required": true
