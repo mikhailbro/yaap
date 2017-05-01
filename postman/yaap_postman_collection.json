@@ -2,7 +2,7 @@
 	"variables": [],
 	"info": {
 		"name": "yaap",
-		"_postman_id": "c4a7f8bc-6496-3dc6-9940-6afc58e57397",
+		"_postman_id": "b58d7db2-bacc-e0ff-616b-ead59ee4f0f2",
 		"description": "",
 		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
 	},
@@ -156,7 +156,10 @@
 									"var jsonData = JSON.parse(responseBody);",
 									"tests[\"body.name\"] = jsonData.name === \"myFirstApi\";",
 									"tests[\"body.state\"] = jsonData.state === \"enabled\";",
-									"tests[\"body.approvalWorkflow\"] = jsonData.approvalWorkflow === true;",
+									"tests[\"body.clientRegistrationWebhook.url\"] = jsonData.clientRegistrationWebhook.url[0] === \"https://myWebhook.com/1\";",
+									"tests[\"body.clientRegistrationWebhook.url\"] = jsonData.clientRegistrationWebhook.url[1] === \"https://myWebhook.com/2\";",
+									"tests[\"body.clientRegistrationWebhook.securityToken.httpHeader\"] = jsonData.clientRegistrationWebhook.securityToken.httpHeader === \"x-authorization\";",
+									"tests[\"body.clientRegistrationWebhook.securityToken.token\"] = jsonData.clientRegistrationWebhook.securityToken.token === \"abcdef\";",
 									"tests[\"body.tenantId\"] = jsonData.tenantId === postman.getGlobalVariable(\"tenantId_1\");",
 									"",
 									"",
@@ -182,14 +185,14 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"name\": \"myFirstApi\",\n\t\"tenantId\": \"{{tenantId_1}}\",\n\t\"state\": \"enabled\",\n\t\"audience\": [\"{{tenantId_1}}\", \"{{tenantId_2}}\"],\n\t\"approvalWorkflow\": true,\n\t\"approvalEndpoint\": \"https://myhost/endpoint\",\n\t\"swagger\": {\n\t\t\"swagger\": \"2.0\",\n\t  \t\t\"info\": {\n\t  \t\t\t\"title\": \"myFirstApi\",\n\t  \t\t\t\"version\": \"1.0\"\n\t  \t},\n\t  \t\"paths\": {\n\t  \t\t\"/pets\": {\n\t    \t\t\"get\": {\n\t    \t\t\t\"responses\": {\n\t       \t\t\t\t\"200\": {\n\t       \t\t\t\t\t\"schema\": {\n\t           \t\t\t\t\t\"type\": \"array\",\n\t           \t\t\t\t\t\"items\": {\n\t          \t\t\t\t\t\t\"$ref\": \"#/definitions/pet\"\n\t           \t\t\t\t\t}\n\t       \t\t\t\t\t}\n\t       \t\t\t\t}\n\t    \t\t\t}\n\t    \t\t}\n\t\t\t}\n\t\t}\n\t}\n}"
+							"raw": "{\n\t\"name\": \"myFirstApi\",\n\t\"tenantId\": \"{{tenantId_1}}\",\n\t\"state\": \"enabled\",\n\t\"audience\": [\"{{tenantId_1}}\", \"{{tenantId_2}}\"],\n\t\"clientRegistrationWebhook\": {\n\t\t\"url\": [\"https://myWebhook.com/1\", \"https://myWebhook.com/2\"],\n\t\t\"securityToken\": {\n\t\t\t\"httpHeader\": \"x-authorization\",\n\t\t\t\"token\": \"abcdef\"\n\t\t}\n\t},\n\t\"swagger\": {\n\t\t\"swagger\": \"2.0\",\n\t  \t\t\"info\": {\n\t  \t\t\t\"title\": \"myFirstApi\",\n\t  \t\t\t\"version\": \"1.0\"\n\t  \t},\n\t  \t\"paths\": {\n\t  \t\t\"/pets\": {\n\t    \t\t\"get\": {\n\t    \t\t\t\"responses\": {\n\t       \t\t\t\t\"200\": {\n\t       \t\t\t\t\t\"schema\": {\n\t           \t\t\t\t\t\"type\": \"array\",\n\t           \t\t\t\t\t\"items\": {\n\t          \t\t\t\t\t\t\"$ref\": \"#/definitions/pet\"\n\t           \t\t\t\t\t}\n\t       \t\t\t\t\t}\n\t       \t\t\t\t}\n\t    \t\t\t}\n\t    \t\t}\n\t\t\t}\n\t\t}\n\t}\n}"
 						},
 						"description": ""
 					},
 					"response": []
 				},
 				{
-					"name": "ok (admin) - create api 2 (tenantId 2, audience 2, approvalWorkflow default)",
+					"name": "ok (admin) - create api 2 (tenantId 2, audience 2)",
 					"event": [
 						{
 							"listen": "test",
@@ -201,7 +204,8 @@
 									"var jsonData = JSON.parse(responseBody);",
 									"tests[\"body.name\"] = jsonData.name === \"mySecondApi\";",
 									"tests[\"body.state\"] = jsonData.state === \"enabled\";",
-									"tests[\"body.approvalWorkflow\"] = jsonData.approvalWorkflow === false;",
+									"tests[\"body.clientRegistrationWebhook.url\"] = jsonData.clientRegistrationWebhook.url[0] === \"https://myWebhook.com/1\";",
+									"tests[\"body.clientRegistrationWebhook.url\"] = jsonData.clientRegistrationWebhook.url[1] === \"https://myWebhook.com/2\";",
 									"tests[\"body.tenantId\"] = jsonData.tenantId === postman.getGlobalVariable(\"tenantId_2\");",
 									"",
 									"",
@@ -227,14 +231,14 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"name\": \"mySecondApi\",\n\t\"tenantId\": \"{{tenantId_2}}\",\n\t\"state\": \"enabled\",\n\t\"audience\": [\"{{tenantId_2}}\"],\n\t\"swagger\": {\n\t\t\"swagger\": \"2.0\",\n\t  \t\t\"info\": {\n\t  \t\t\t\"title\": \"myFirstApi\",\n\t  \t\t\t\"version\": \"1.0\"\n\t  \t},\n\t  \t\"paths\": {\n\t  \t\t\"/pets\": {\n\t    \t\t\"get\": {\n\t    \t\t\t\"responses\": {\n\t       \t\t\t\t\"200\": {\n\t       \t\t\t\t\t\"schema\": {\n\t           \t\t\t\t\t\"type\": \"array\",\n\t           \t\t\t\t\t\"items\": {\n\t          \t\t\t\t\t\t\"$ref\": \"#/definitions/pet\"\n\t           \t\t\t\t\t}\n\t       \t\t\t\t\t}\n\t       \t\t\t\t}\n\t    \t\t\t}\n\t    \t\t}\n\t\t\t}\n\t\t}\n\t}\n}"
+							"raw": "{\n\t\"name\": \"mySecondApi\",\n\t\"tenantId\": \"{{tenantId_2}}\",\n\t\"state\": \"enabled\",\n\t\"audience\": [\"{{tenantId_2}}\"],\n\t\"clientRegistrationWebhook\": {\n\t\t\"url\": [\"https://myWebhook.com/1\", \"https://myWebhook.com/2\"]\n\t},\n\t\"swagger\": {\n\t\t\"swagger\": \"2.0\",\n\t  \t\t\"info\": {\n\t  \t\t\t\"title\": \"myFirstApi\",\n\t  \t\t\t\"version\": \"1.0\"\n\t  \t},\n\t  \t\"paths\": {\n\t  \t\t\"/pets\": {\n\t    \t\t\"get\": {\n\t    \t\t\t\"responses\": {\n\t       \t\t\t\t\"200\": {\n\t       \t\t\t\t\t\"schema\": {\n\t           \t\t\t\t\t\"type\": \"array\",\n\t           \t\t\t\t\t\"items\": {\n\t          \t\t\t\t\t\t\"$ref\": \"#/definitions/pet\"\n\t           \t\t\t\t\t}\n\t       \t\t\t\t\t}\n\t       \t\t\t\t}\n\t    \t\t\t}\n\t    \t\t}\n\t\t\t}\n\t\t}\n\t}\n}"
 						},
 						"description": ""
 					},
 					"response": []
 				},
 				{
-					"name": "ok (owner 1) - create api 3 (tenantId 1, no audience, default state)",
+					"name": "ok (owner 1) - create api 3 (tenantId 1, no audience, default state, no clientRegistrationWebhook)",
 					"event": [
 						{
 							"listen": "test",
@@ -246,7 +250,6 @@
 									"var jsonData = JSON.parse(responseBody);",
 									"tests[\"body.name\"] = jsonData.name === \"myThirdApi\";",
 									"tests[\"body.state\"] = jsonData.state === \"enabled\";",
-									"tests[\"body.approvalWorkflow\"] = jsonData.approvalWorkflow === true;",
 									"tests[\"body.tenantId\"] = jsonData.tenantId === postman.getGlobalVariable(\"tenantId_1\");",
 									"",
 									"postman.setGlobalVariable(\"apiId_3\", jsonData.id);"
@@ -271,7 +274,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"name\": \"myThirdApi\",\n\t\"tenantId\": \"{{tenantId_1}}\",\n\t\"approvalWorkflow\": true,\n\t\"approvalEndpoint\": \"https://myhost/endpoint\",\n\t\"swagger\": {\n\t\t\"swagger\": \"2.0\",\n\t  \t\t\"info\": {\n\t  \t\t\t\"title\": \"myFirstApi\",\n\t  \t\t\t\"version\": \"1.0\"\n\t  \t},\n\t  \t\"paths\": {\n\t  \t\t\"/pets\": {\n\t    \t\t\"get\": {\n\t    \t\t\t\"responses\": {\n\t       \t\t\t\t\"200\": {\n\t       \t\t\t\t\t\"schema\": {\n\t           \t\t\t\t\t\"type\": \"array\",\n\t           \t\t\t\t\t\"items\": {\n\t          \t\t\t\t\t\t\"$ref\": \"#/definitions/pet\"\n\t           \t\t\t\t\t}\n\t       \t\t\t\t\t}\n\t       \t\t\t\t}\n\t    \t\t\t}\n\t    \t\t}\n\t\t\t}\n\t\t}\n\t}\n}"
+							"raw": "{\n\t\"name\": \"myThirdApi\",\n\t\"tenantId\": \"{{tenantId_1}}\",\n\t\"swagger\": {\n\t\t\"swagger\": \"2.0\",\n\t  \t\t\"info\": {\n\t  \t\t\t\"title\": \"myFirstApi\",\n\t  \t\t\t\"version\": \"1.0\"\n\t  \t},\n\t  \t\"paths\": {\n\t  \t\t\"/pets\": {\n\t    \t\t\"get\": {\n\t    \t\t\t\"responses\": {\n\t       \t\t\t\t\"200\": {\n\t       \t\t\t\t\t\"schema\": {\n\t           \t\t\t\t\t\"type\": \"array\",\n\t           \t\t\t\t\t\"items\": {\n\t          \t\t\t\t\t\t\"$ref\": \"#/definitions/pet\"\n\t           \t\t\t\t\t}\n\t       \t\t\t\t\t}\n\t       \t\t\t\t}\n\t    \t\t\t}\n\t    \t\t}\n\t\t\t}\n\t\t}\n\t}\n}"
 						},
 						"description": ""
 					},
@@ -558,7 +561,7 @@
 					"response": []
 				},
 				{
-					"name": "nok (owner 1) - workflowEndpoint missing",
+					"name": "nok (owner 1) - clientRegistrationWebhook.url missing",
 					"event": [
 						{
 							"listen": "test",
@@ -569,7 +572,7 @@
 									"",
 									"var jsonData = JSON.parse(responseBody);",
 									"tests[\"body.name\"] = jsonData.error.name === \"Error\";",
-									"tests[\"body.message\"] = jsonData.error.message === \"Input validation failed for \\\"approvalEndpoint\\\".\";"
+									"tests[\"body.message\"] = jsonData.error.message === \"Attribut url within clientRegistrationWebhook must exist.\";"
 								]
 							}
 						}
@@ -591,7 +594,87 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"name\": \"myFirstApi\",\n\t\"tenantId\": \"{{tenantId_1}}\",\n\t\"state\": \"enabled\",\n\t\"audience\": [\"{{tenantId_1}}\", \"{{tenantId_2}}\"],\n\t\"approvalWorkflow\": true,\n\t\"swagger\": {\n\t\t\"swagger\": \"2.0\",\n\t  \t\t\"info\": {\n\t  \t\t\t\"title\": \"myFirstApi\",\n\t  \t\t\t\"version\": \"1.0\"\n\t  \t},\n\t  \t\"paths\": {\n\t  \t\t\"/pets\": {\n\t    \t\t\"get\": {\n\t    \t\t\t\"responses\": {\n\t       \t\t\t\t\"200\": {\n\t       \t\t\t\t\t\"schema\": {\n\t           \t\t\t\t\t\"type\": \"array\",\n\t           \t\t\t\t\t\"items\": {\n\t          \t\t\t\t\t\t\"$ref\": \"#/definitions/pet\"\n\t           \t\t\t\t\t}\n\t       \t\t\t\t\t}\n\t       \t\t\t\t}\n\t    \t\t\t}\n\t    \t\t}\n\t\t\t}\n\t\t}\n\t}\n}"
+							"raw": "{\n\t\"name\": \"myFirstApi\",\n\t\"tenantId\": \"{{tenantId_1}}\",\n\t\"state\": \"enabled\",\n\t\"clientRegistrationWebhook\": {\n\t\t\n\t},\n\t\"audience\": [\"{{tenantId_1}}\", \"{{tenantId_2}}\"],\n\t\"swagger\": {\n\t\t\"swagger\": \"2.0\",\n\t  \t\t\"info\": {\n\t  \t\t\t\"title\": \"myFirstApi\",\n\t  \t\t\t\"version\": \"1.0\"\n\t  \t},\n\t  \t\"paths\": {\n\t  \t\t\"/pets\": {\n\t    \t\t\"get\": {\n\t    \t\t\t\"responses\": {\n\t       \t\t\t\t\"200\": {\n\t       \t\t\t\t\t\"schema\": {\n\t           \t\t\t\t\t\"type\": \"array\",\n\t           \t\t\t\t\t\"items\": {\n\t          \t\t\t\t\t\t\"$ref\": \"#/definitions/pet\"\n\t           \t\t\t\t\t}\n\t       \t\t\t\t\t}\n\t       \t\t\t\t}\n\t    \t\t\t}\n\t    \t\t}\n\t\t\t}\n\t\t}\n\t}\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "nok (owner 1) - clientRegistrationWebhook.securityToken.httpHeader missing",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status Code\"] = responseCode.code === 400;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.name\"] = jsonData.error.name === \"Error\";",
+									"tests[\"body.message\"] = jsonData.error.message === \"Attribut httpHeader within clientRegistrationWebhook.securityToken must exist.\";"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://{{uriDomain}}/api/apis",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{owner1Ttoken}}",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"myFirstApi\",\n\t\"tenantId\": \"{{tenantId_1}}\",\n\t\"state\": \"enabled\",\n\t\"clientRegistrationWebhook\": {\n\t\t\"url\": [\"https://myWebhook.com/1\"],\n\t\t\"securityToken\": {\n\t\t\t\n\t\t}\n\t},\n\t\"audience\": [\"{{tenantId_1}}\", \"{{tenantId_2}}\"],\n\t\"swagger\": {\n\t\t\"swagger\": \"2.0\",\n\t  \t\t\"info\": {\n\t  \t\t\t\"title\": \"myFirstApi\",\n\t  \t\t\t\"version\": \"1.0\"\n\t  \t},\n\t  \t\"paths\": {\n\t  \t\t\"/pets\": {\n\t    \t\t\"get\": {\n\t    \t\t\t\"responses\": {\n\t       \t\t\t\t\"200\": {\n\t       \t\t\t\t\t\"schema\": {\n\t           \t\t\t\t\t\"type\": \"array\",\n\t           \t\t\t\t\t\"items\": {\n\t          \t\t\t\t\t\t\"$ref\": \"#/definitions/pet\"\n\t           \t\t\t\t\t}\n\t       \t\t\t\t\t}\n\t       \t\t\t\t}\n\t    \t\t\t}\n\t    \t\t}\n\t\t\t}\n\t\t}\n\t}\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "nok (owner 1) - clientRegistrationWebhook.securityToken.token missing",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status Code\"] = responseCode.code === 400;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.name\"] = jsonData.error.name === \"Error\";",
+									"tests[\"body.message\"] = jsonData.error.message === \"Attribut token within clientRegistrationWebhook.securityToken must exist.\";"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://{{uriDomain}}/api/apis",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{owner1Ttoken}}",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"myFirstApi\",\n\t\"tenantId\": \"{{tenantId_1}}\",\n\t\"state\": \"enabled\",\n\t\"clientRegistrationWebhook\": {\n\t\t\"url\": [\"https://myWebhook.com/1\"],\n\t\t\"securityToken\": {\n\t\t\t\"httpHeader\": \"x-authorization\"\n\t\t}\n\t},\n\t\"audience\": [\"{{tenantId_1}}\", \"{{tenantId_2}}\"],\n\t\"swagger\": {\n\t\t\"swagger\": \"2.0\",\n\t  \t\t\"info\": {\n\t  \t\t\t\"title\": \"myFirstApi\",\n\t  \t\t\t\"version\": \"1.0\"\n\t  \t},\n\t  \t\"paths\": {\n\t  \t\t\"/pets\": {\n\t    \t\t\"get\": {\n\t    \t\t\t\"responses\": {\n\t       \t\t\t\t\"200\": {\n\t       \t\t\t\t\t\"schema\": {\n\t           \t\t\t\t\t\"type\": \"array\",\n\t           \t\t\t\t\t\"items\": {\n\t          \t\t\t\t\t\t\"$ref\": \"#/definitions/pet\"\n\t           \t\t\t\t\t}\n\t       \t\t\t\t\t}\n\t       \t\t\t\t}\n\t    \t\t\t}\n\t    \t\t}\n\t\t\t}\n\t\t}\n\t}\n}"
 						},
 						"description": ""
 					},
@@ -932,7 +1015,7 @@
 					"response": []
 				},
 				{
-					"name": "ok (owner 1) - update api 1 (name, state, audience & approvalWorkflow)",
+					"name": "ok (owner 1) - update api 1 (name, state, audience)",
 					"event": [
 						{
 							"listen": "test",
@@ -945,8 +1028,6 @@
 									"tests[\"body.name\"] = jsonData.name === \"myFirstApiUPDATED\";",
 									"tests[\"body.state\"] = jsonData.state === \"disabled\";",
 									"tests[\"body.audience\"] = jsonData.audience[0] === postman.getGlobalVariable(\"tenantId_1\");",
-									"tests[\"body.approvalWorkflow\"] = jsonData.approvalWorkflow === false;",
-									"tests[\"body.workflowEndpoint\"] = jsonData.workflowEndpoint == null;",
 									"tests[\"body.tenantId\"] = jsonData.tenantId === postman.getGlobalVariable(\"tenantId_1\");"
 								]
 							}
@@ -969,7 +1050,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"name\": \"myFirstApiUPDATED\",\n\t\"tenantId\": \"{{tenantId_1}}\",\n\t\"state\": \"disabled\",\n\t\"audience\": [\"{{tenantId_1}}\"],\n\t\"approvalWorkflow\": false,\n\t\"swagger\": {\n\t\t\"swagger\": \"2.0\",\n\t  \t\t\"info\": {\n\t  \t\t\t\"title\": \"myFirstApi\",\n\t  \t\t\t\"version\": \"1.0\"\n\t  \t},\n\t  \t\"paths\": {\n\t  \t\t\"/pets\": {\n\t    \t\t\"get\": {\n\t    \t\t\t\"responses\": {\n\t       \t\t\t\t\"200\": {\n\t       \t\t\t\t\t\"schema\": {\n\t           \t\t\t\t\t\"type\": \"array\",\n\t           \t\t\t\t\t\"items\": {\n\t          \t\t\t\t\t\t\"$ref\": \"#/definitions/pet\"\n\t           \t\t\t\t\t}\n\t       \t\t\t\t\t}\n\t       \t\t\t\t}\n\t    \t\t\t}\n\t    \t\t}\n\t\t\t}\n\t\t}\n\t}\n}"
+							"raw": "{\n\t\"name\": \"myFirstApiUPDATED\",\n\t\"tenantId\": \"{{tenantId_1}}\",\n\t\"state\": \"disabled\",\n\t\"audience\": [\"{{tenantId_1}}\"],\n\t\"swagger\": {\n\t\t\"swagger\": \"2.0\",\n\t  \t\t\"info\": {\n\t  \t\t\t\"title\": \"myFirstApi\",\n\t  \t\t\t\"version\": \"1.0\"\n\t  \t},\n\t  \t\"paths\": {\n\t  \t\t\"/pets\": {\n\t    \t\t\"get\": {\n\t    \t\t\t\"responses\": {\n\t       \t\t\t\t\"200\": {\n\t       \t\t\t\t\t\"schema\": {\n\t           \t\t\t\t\t\"type\": \"array\",\n\t           \t\t\t\t\t\"items\": {\n\t          \t\t\t\t\t\t\"$ref\": \"#/definitions/pet\"\n\t           \t\t\t\t\t}\n\t       \t\t\t\t\t}\n\t       \t\t\t\t}\n\t    \t\t\t}\n\t    \t\t}\n\t\t\t}\n\t\t}\n\t}\n}"
 						},
 						"description": ""
 					},
@@ -1218,7 +1299,7 @@
 					"response": []
 				},
 				{
-					"name": "nok (owner 1) - workflowEndpoint missing",
+					"name": "nok (owner 1) - clientRegistrationWebhook.url missing",
 					"event": [
 						{
 							"listen": "test",
@@ -1229,7 +1310,7 @@
 									"",
 									"var jsonData = JSON.parse(responseBody);",
 									"tests[\"body.name\"] = jsonData.error.name === \"Error\";",
-									"tests[\"body.message\"] = jsonData.error.message === \"Input validation failed for \\\"approvalEndpoint\\\".\";"
+									"tests[\"body.message\"] = jsonData.error.message === \"Attribut url within clientRegistrationWebhook must exist.\";"
 								]
 							}
 						}
@@ -1251,40 +1332,88 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"name\": \"myFirstApi\",\n\t\"tenantId\": \"{{tenantId_1}}\",\n\t\"state\": \"wrongState\",\n\t\"audience\": [\"{{tenantId_1}}\", \"{{tenantId_2}}\"],\n\t\"approvalWorkflow\": true,\n\t\"swagger\": {\n\t\t\"swagger\": \"2.0\",\n\t  \t\t\"info\": {\n\t  \t\t\t\"title\": \"myFirstApi\",\n\t  \t\t\t\"version\": \"1.0\"\n\t  \t},\n\t  \t\"paths\": {\n\t  \t\t\"/pets\": {\n\t    \t\t\"get\": {\n\t    \t\t\t\"responses\": {\n\t       \t\t\t\t\"200\": {\n\t       \t\t\t\t\t\"schema\": {\n\t           \t\t\t\t\t\"type\": \"array\",\n\t           \t\t\t\t\t\"items\": {\n\t          \t\t\t\t\t\t\"$ref\": \"#/definitions/pet\"\n\t           \t\t\t\t\t}\n\t       \t\t\t\t\t}\n\t       \t\t\t\t}\n\t    \t\t\t}\n\t    \t\t}\n\t\t\t}\n\t\t}\n\t}\n}"
+							"raw": "{\n\t\"name\": \"myFirstApi\",\n\t\"tenantId\": \"{{tenantId_1}}\",\n\t\"state\": \"enabled\",\n\t\"clientRegistrationWebhook\": {\n\t\t\n\t},\n\t\"audience\": [\"{{tenantId_1}}\", \"{{tenantId_2}}\"],\n\t\"swagger\": {\n\t\t\"swagger\": \"2.0\",\n\t  \t\t\"info\": {\n\t  \t\t\t\"title\": \"myFirstApi\",\n\t  \t\t\t\"version\": \"1.0\"\n\t  \t},\n\t  \t\"paths\": {\n\t  \t\t\"/pets\": {\n\t    \t\t\"get\": {\n\t    \t\t\t\"responses\": {\n\t       \t\t\t\t\"200\": {\n\t       \t\t\t\t\t\"schema\": {\n\t           \t\t\t\t\t\"type\": \"array\",\n\t           \t\t\t\t\t\"items\": {\n\t          \t\t\t\t\t\t\"$ref\": \"#/definitions/pet\"\n\t           \t\t\t\t\t}\n\t       \t\t\t\t\t}\n\t       \t\t\t\t}\n\t    \t\t\t}\n\t    \t\t}\n\t\t\t}\n\t\t}\n\t}\n}"
 						},
 						"description": ""
 					},
 					"response": []
 				},
 				{
-					"name": "nok (owner 3) - wrong apiOwner tenant",
+					"name": "nok (owner 1) - clientRegistrationWebhook.securityToken.httpHeader missing",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"type": "text/javascript",
 								"exec": [
-									"tests[\"Status Code\"] = responseCode.code === 404;",
+									"tests[\"Status Code\"] = responseCode.code === 400;",
 									"",
 									"var jsonData = JSON.parse(responseBody);",
-									"tests[\"error.name\"] = jsonData.error.name === \"Error\";",
-									"tests[\"error.message\"] = jsonData.error.message === \"Unknown \\\"api\\\" id \\\"\"+postman.getGlobalVariable(\"apiId_1\")+\"\\\".\";"
+									"tests[\"body.name\"] = jsonData.error.name === \"Error\";",
+									"tests[\"body.message\"] = jsonData.error.message === \"Attribut httpHeader within clientRegistrationWebhook.securityToken must exist.\";"
 								]
 							}
 						}
 					],
 					"request": {
 						"url": "http://{{uriDomain}}/api/apis/{{apiId_1}}",
-						"method": "DELETE",
+						"method": "PUT",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "{{owner3Token}}",
+								"value": "{{owner1Ttoken}}",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
 								"description": ""
 							}
 						],
-						"body": {},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"myFirstApi\",\n\t\"tenantId\": \"{{tenantId_1}}\",\n\t\"state\": \"enabled\",\n\t\"clientRegistrationWebhook\": {\n\t\t\"url\": [\"https://myWebhook.com/1\", \"https://myWebhook.com/2\"],\n\t\t\"securityToken\": {}\n\t},\n\t\"audience\": [\"{{tenantId_1}}\", \"{{tenantId_2}}\"],\n\t\"swagger\": {\n\t\t\"swagger\": \"2.0\",\n\t  \t\t\"info\": {\n\t  \t\t\t\"title\": \"myFirstApi\",\n\t  \t\t\t\"version\": \"1.0\"\n\t  \t},\n\t  \t\"paths\": {\n\t  \t\t\"/pets\": {\n\t    \t\t\"get\": {\n\t    \t\t\t\"responses\": {\n\t       \t\t\t\t\"200\": {\n\t       \t\t\t\t\t\"schema\": {\n\t           \t\t\t\t\t\"type\": \"array\",\n\t           \t\t\t\t\t\"items\": {\n\t          \t\t\t\t\t\t\"$ref\": \"#/definitions/pet\"\n\t           \t\t\t\t\t}\n\t       \t\t\t\t\t}\n\t       \t\t\t\t}\n\t    \t\t\t}\n\t    \t\t}\n\t\t\t}\n\t\t}\n\t}\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "nok (owner 1) - clientRegistrationWebhook.securityToken.token missing",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status Code\"] = responseCode.code === 400;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"body.name\"] = jsonData.error.name === \"Error\";",
+									"tests[\"body.message\"] = jsonData.error.message === \"Attribut token within clientRegistrationWebhook.securityToken must exist.\";"
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://{{uriDomain}}/api/apis/{{apiId_1}}",
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{owner1Ttoken}}",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"myFirstApi\",\n\t\"tenantId\": \"{{tenantId_1}}\",\n\t\"state\": \"enabled\",\n\t\"clientRegistrationWebhook\": {\n\t\t\"url\": [\"https://myWebhook.com/1\", \"https://myWebhook.com/2\"],\n\t\t\"securityToken\": {\n\t\t\t\"httpHeader\": \"x-authorization\"\n\t\t}\n\t},\n\t\"audience\": [\"{{tenantId_1}}\", \"{{tenantId_2}}\"],\n\t\"swagger\": {\n\t\t\"swagger\": \"2.0\",\n\t  \t\t\"info\": {\n\t  \t\t\t\"title\": \"myFirstApi\",\n\t  \t\t\t\"version\": \"1.0\"\n\t  \t},\n\t  \t\"paths\": {\n\t  \t\t\"/pets\": {\n\t    \t\t\"get\": {\n\t    \t\t\t\"responses\": {\n\t       \t\t\t\t\"200\": {\n\t       \t\t\t\t\t\"schema\": {\n\t           \t\t\t\t\t\"type\": \"array\",\n\t           \t\t\t\t\t\"items\": {\n\t          \t\t\t\t\t\t\"$ref\": \"#/definitions/pet\"\n\t           \t\t\t\t\t}\n\t       \t\t\t\t\t}\n\t       \t\t\t\t}\n\t    \t\t\t}\n\t    \t\t}\n\t\t\t}\n\t\t}\n\t}\n}"
+						},
 						"description": ""
 					},
 					"response": []
@@ -1650,7 +1779,10 @@
 								"description": ""
 							}
 						],
-						"body": {},
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"description": ""
 					},
 					"response": []
@@ -1987,6 +2119,46 @@
 					"response": []
 				},
 				{
+					"name": "nok (consumer 3) - secret cannot be set",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status Code\"] = responseCode.code === 400;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"error.message\"] = jsonData.error.message === \"Secret cannot be set via API.\"",
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "http://{{uriDomain}}/api/clients",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{consumer3Token}}",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"id\": \"APP-5\",\r\n  \"tenantId\": \"{{tenantId_3}}\",\r\n  \"name\": \"APPL-FIVE\",\r\n  \"contact\": \"WGR-BOX ASE\",\r\n  \"type\": \"public\",\r\n  \"secret\": \"topsecret\"\r\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
 					"name": "ok (admin) - get all clients",
 					"event": [
 						{
@@ -2014,7 +2186,10 @@
 								"description": ""
 							}
 						],
-						"body": {},
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"description": ""
 					},
 					"response": []
@@ -2047,7 +2222,10 @@
 								"description": ""
 							}
 						],
-						"body": {},
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"description": ""
 					},
 					"response": []
@@ -2140,12 +2318,11 @@
 							"script": {
 								"type": "text/javascript",
 								"exec": [
-									"tests[\"Status Code\"] = responseCode.code === 200;",
+									"tests[\"Status Code\"] = responseCode.code === 404;",
 									"",
 									"var jsonData = JSON.parse(responseBody);",
-									"tests[\"body.id\"] = jsonData.id === \"APP-1\";",
-									"tests[\"body.contact\"] = jsonData.contact === \"AXA-TECH BOX\";",
-									"tests[\"body.tenantId\"] = jsonData.tenantId === postman.getGlobalVariable(\"tenantId_1\");"
+									"tests[\"error.name\"] = jsonData.error.name === \"Error\";",
+									"tests[\"error.message\"] = jsonData.error.message === \"Unknown \\\"client\\\" id \\\"APPL-XXX\\\".\";"
 								]
 							}
 						}
@@ -2263,12 +2440,11 @@
 							"script": {
 								"type": "text/javascript",
 								"exec": [
-									"tests[\"Status Code\"] = responseCode.code === 200;",
+									"tests[\"Status Code\"] = responseCode.code === 400;",
 									"",
 									"var jsonData = JSON.parse(responseBody);",
-									"tests[\"body.id\"] = jsonData.id === \"APP-1\";",
-									"tests[\"body.contact\"] = jsonData.contact === \"AXA-TECH BOX\";",
-									"tests[\"body.tenantId\"] = jsonData.tenantId === postman.getGlobalVariable(\"tenantId_1\");"
+									"tests[\"body.name\"] = jsonData.error.name === \"Error\";",
+									"tests[\"body.message\"] = jsonData.error.message === \"Wrong tenantId in request body.\";"
 								]
 							}
 						}
@@ -2308,7 +2484,7 @@
 									"",
 									"var jsonData = JSON.parse(responseBody);",
 									"tests[\"body.name\"] = jsonData.error.name === \"Error\";",
-									"tests[\"body.message\"] = jsonData.error.message === \"Unknown client id: APP-5\";"
+									"tests[\"body.message\"] = jsonData.error.message === \"Unknown client id: APPL-XXX\";"
 								]
 							}
 						}
@@ -2355,7 +2531,10 @@
 								"description": ""
 							}
 						],
-						"body": {},
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"description": ""
 					},
 					"response": []
@@ -2388,7 +2567,10 @@
 								"description": ""
 							}
 						],
-						"body": {},
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"description": ""
 					},
 					"response": []
@@ -2421,7 +2603,10 @@
 								"description": ""
 							}
 						],
-						"body": {},
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"description": ""
 					},
 					"response": []
@@ -2454,7 +2639,10 @@
 								"description": ""
 							}
 						],
-						"body": {},
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"description": ""
 					},
 					"response": []
@@ -2487,7 +2675,10 @@
 								"description": ""
 							}
 						],
-						"body": {},
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"description": ""
 					},
 					"response": []
@@ -2520,7 +2711,10 @@
 								"description": ""
 							}
 						],
-						"body": {},
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"description": ""
 					},
 					"response": []
@@ -2553,7 +2747,10 @@
 								"description": ""
 							}
 						],
-						"body": {},
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"description": ""
 					},
 					"response": []
@@ -2586,7 +2783,10 @@
 								"description": ""
 							}
 						],
-						"body": {},
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"description": ""
 					},
 					"response": []
@@ -2617,7 +2817,10 @@
 								"description": ""
 							}
 						],
-						"body": {},
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"description": ""
 					},
 					"response": []
@@ -2648,7 +2851,10 @@
 								"description": ""
 							}
 						],
-						"body": {},
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"description": ""
 					},
 					"response": []
@@ -3593,7 +3799,10 @@
 								"description": ""
 							}
 						],
-						"body": {},
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"description": ""
 					},
 					"response": []

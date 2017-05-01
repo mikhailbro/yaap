@@ -61,9 +61,7 @@ module.exports = function(Client) {
   		// *** END check the correctness of the tenantId entry ***
   		
   		// Validate x509CertificateChain (optional)
-  		console.log("x509CertificateChain:"+context.req.body.x509CertificateChain);
   		if (context.req.body.x509CertificateChain) {
-  			console.log("x509CertificateChain.length:"+context.req.body.x509CertificateChain.length);
   			if (context.req.body.x509CertificateChain.length < 2) {
   				next(createError(400, 'Certificate chain must at least have two certificates.', 'BAD_REQUEST'));
 				return;

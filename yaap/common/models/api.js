@@ -124,11 +124,20 @@ module.exports = function(Api) {
 	    }
 
 	    // Input validation
-	    // ApprovalEndpoint must exist if approvalWorkflow = true
-		if (context.req.body.approvalWorkflow && !context.req.body.approvalEndpoint) {
-			next(createError(400, 'Input validation failed for "approvalEndpoint".', 'BAD_REQUEST'));
-			return;	
-		}
+	    if (context.req.body.clientRegistrationWebhook) {
+	    	if (!context.req.body.clientRegistrationWebhook.url || !context.req.body.clientRegistrationWebhook.url.length > 0) {
+	    		next(createError(400, 'Attribut url within clientRegistrationWebhook must exist.', 'BAD_REQUEST'));
+				return;
+	    	}
+	    	if (context.req.body.clientRegistrationWebhook.securityToken && !context.req.body.clientRegistrationWebhook.securityToken.httpHeader) {
+	    		next(createError(400, 'Attribut httpHeader within clientRegistrationWebhook.securityToken must exist.', 'BAD_REQUEST'));
+				return;
+	    	}
+	    	if (context.req.body.clientRegistrationWebhook.securityToken && !context.req.body.clientRegistrationWebhook.securityToken.token) {
+	    		next(createError(400, 'Attribut token within clientRegistrationWebhook.securityToken must exist.', 'BAD_REQUEST'));
+				return;
+	    	}
+	    }
 
 		// Check if all audiences exist as tenants
 		if (!context.req.body.audience) {
@@ -170,11 +179,20 @@ module.exports = function(Api) {
 			}
 
 			// Input validation
-		    // ApprovalEndpoint must exist if approvalWorkflow = true
-			if (context.req.body.approvalWorkflow && !context.req.body.approvalEndpoint) {
-				next(createError(400, 'Input validation failed for "approvalEndpoint".', 'BAD_REQUEST'));
-				return;	
-			}
+		    if (context.req.body.clientRegistrationWebhook) {
+		    	if (!context.req.body.clientRegistrationWebhook.url || !context.req.body.clientRegistrationWebhook.url.length > 0) {
+		    		next(createError(400, 'Attribut url within clientRegistrationWebhook must exist.', 'BAD_REQUEST'));
+					return;
+		    	}
+		    	if (context.req.body.clientRegistrationWebhook.securityToken && !context.req.body.clientRegistrationWebhook.securityToken.httpHeader) {
+		    		next(createError(400, 'Attribut httpHeader within clientRegistrationWebhook.securityToken must exist.', 'BAD_REQUEST'));
+					return;
+		    	}
+		    	if (context.req.body.clientRegistrationWebhook.securityToken && !context.req.body.clientRegistrationWebhook.securityToken.token) {
+		    		next(createError(400, 'Attribut token within clientRegistrationWebhook.securityToken must exist.', 'BAD_REQUEST'));
+					return;
+		    	}
+		    }
 
 			// Check if all audiences exists as tenants
 			if (!context.req.body.audience) {

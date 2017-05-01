@@ -63,7 +63,7 @@
 		  			}
 		  		}
 		  	}	
-		 },
+		},
 		"updatedBy": {
 			"type": "string",
 			"required": true
