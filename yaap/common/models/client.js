@@ -61,9 +61,9 @@ module.exports = function(Client) {
   		// *** END check the correctness of the tenantId entry ***
   		
   		// Validate x509CertificateChain (optional)
-  		console.log(context.req.body.x509CertificateChain);
-  		console.log(context.req.body.x509CertificateChain.length);
+  		console.log("x509CertificateChain:"+context.req.body.x509CertificateChain);
   		if (context.req.body.x509CertificateChain) {
+  			console.log("x509CertificateChain.length:"+context.req.body.x509CertificateChain.length);
   			if (context.req.body.x509CertificateChain.length < 2) {
   				next(createError(400, 'Certificate chain must at least have two certificates.', 'BAD_REQUEST'));
 				return;
@@ -135,8 +135,8 @@ module.exports = function(Client) {
 		var creator = "";
 		var tenant = "";
 		
-		// *** BEGIN reading the existing client byId inkluding check of api relations ***
-		Client.findById(context.req.params.id, { include: {relation: 'apis', scope: {limit: 1}} }, function(err, client) {
+		// *** BEGIN reading the existing client byId including check of api relations ***
+		Client.findById(context.req.params.id, {include: 'apis'}, function(err, client) {
 			if (err) {
 				next(err);
 				return;
@@ -145,7 +145,8 @@ module.exports = function(Client) {
 				next(createError(404, 'Unknown client id: ' + context.req.params.id, 'MODEL_NOT_FOUND'));
 				return;
 			}
-			if (client.apis.count > 0) {
+			console.log("# apis:"+client.apis.length)
+			if (client.apis.length > 0) {
 				next(createError(409, 'This client is still registered by at least one API.', 'CONFLICT'));
 				return;
 			} else {
@@ -172,7 +173,7 @@ module.exports = function(Client) {
 			next();
 			
 		});
-		// *** END reading the existing client byId inkluding check of api relations ***
+		// *** END reading the existing client byId including check of api relations ***
 		
 		
 	});	
