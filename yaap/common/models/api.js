@@ -18,7 +18,7 @@ module.exports = function(Api) {
 
 	// Disable some relational functions for tenants
 	Api.disableRemoteMethodByName('prototype.__get__tenant');			// GET 		/apis/:id/tenant
-	
+
 	// Disable some relational functions for clients
 	Api.disableRemoteMethodByName('prototype.__create__clients');		// POST		/apis/:id/clients
 	Api.disableRemoteMethodByName('prototype.__delete__clients');		// DELETE 	/apis/:id/clients
@@ -27,12 +27,12 @@ module.exports = function(Api) {
 	Api.disableRemoteMethodByName('prototype.__updateById__clients');	// PUT		/apis/:id/clients/:clientId
 	Api.disableRemoteMethodByName('prototype.__destroyById__clients');	// DELETE	/apis/:id/clients/:clientId
 	Api.disableRemoteMethodByName('prototype.__exists__clients');		// HEAD 	/apis/:id/clients/rel/:clientId
-	
+
 	/**************************
 	*	Validation Checks
 	***************************/
 	Api.validatesInclusionOf('state', {in: ['enabled', 'disabled', 'deprecated']});
-	
+
 
 	/**************************
 	*	Remote Hooks
@@ -75,7 +75,7 @@ module.exports = function(Api) {
 	    } else {
 	    	if (!context.args.filter || !context.args.filter.where) {
 		    	// No 'where' filter in request, add where clause to check audience
-				
+
 				if (!context.args.filter) {
 					context.args.filter = {};
 				}
@@ -91,8 +91,8 @@ module.exports = function(Api) {
 		    }
 
 		    next();
-	    }  
-	    
+	    }
+
 	 });
 
 	// GET /apis/{id} - use afterRemote() as no where clause can be set with findById in beforeRemote()
@@ -108,7 +108,7 @@ module.exports = function(Api) {
 				return;
 			}
 		}
-		
+
 	 });
 
 	// POST /apis
@@ -153,20 +153,20 @@ module.exports = function(Api) {
 				next();
 			}
   		});
-		
+
 	});
 
 	// PUT /apis/{id} and  POST /apis/{id}/replace
 	Api.beforeRemote('replaceById', function(context, unused, next) {
-		
+
     	// Read Api first to check authorization
 		Api.findById(context.req.params.id, { fields: {tenantId: true, createdBy: true} }, function(err, api) {
 			if (err) {
 				next(err);
 				return;
 			}
-			
-			// Authorization: Is apiOwnerRole allowed to updated this api?	
+
+			// Authorization: Is apiOwnerRole allowed to updated this api?
 			if (!context.req.user.isAdmin && !isTenantInArray(api.tenantId, context.req.user.apiOwnerTenants)) {
 				next(createError(404, 'Unknown "api" id "' + context.req.params.id + '".', 'MODEL_NOT_FOUND'));
 				return;
@@ -209,7 +209,7 @@ module.exports = function(Api) {
 				}
 	  		});
 		});
-		
+
 	});
 
 	// DELETE /apis/{id}
@@ -233,12 +233,12 @@ module.exports = function(Api) {
 			});
 	    }
 
-		
+
 	});
 
 	// GET /apis/{id}/clients
 	Api.beforeRemote('prototype.__get__clients', function(context, unused, next) {
-		
+
 		if (context.req.user.isAdmin) {
 	    	next();
 	    } else {
@@ -249,7 +249,7 @@ module.exports = function(Api) {
 					return;
 				}
 
-				// Is apiOwnerRole allowed to read this api?	
+				// Is apiOwnerRole allowed to read this api?
 				if (!isTenantInArray(api.tenantId, context.req.user.apiOwnerTenants)) {
 					next(createError(404, 'Unknown "api" id "' + context.req.params.id + '".', 'MODEL_NOT_FOUND'));
 					return;
@@ -260,15 +260,15 @@ module.exports = function(Api) {
 			});
 	    }
 
-		
+
 	});
 
 	// PUT /apis/{id}/clients/rel/{clientId}
 	Api.beforeRemote('prototype.__link__clients', function(context, unused, next) {
-		
+
 		// Note: Api must exist, this is checked by loopback when calling /apis/{id}/...
-    	
-    	// Check if client exists (seems to be a bug in strongloop that this is not checked out-of-the-box)
+
+    // Check if client exists (seems to be a bug in strongloop that this is not checked out-of-the-box)
 		Api.app.models.Client.findById(context.req.params.fk, function(err, client) {
 			if (err) {
 				next(err);
@@ -277,25 +277,25 @@ module.exports = function(Api) {
 
 			if (!client) {
 				next(createError(404, 'Unknown "client" id "' + context.req.params.fk + '".', 'MODEL_NOT_FOUND'));
-				return;	
+				return;
 			}
 
 			// If the client has a tenantId it must match one of apiConsumerTenants
 			if (!context.req.user.isAdmin && client.tenantId && !isTenantInArray(client.tenantId, context.req.user.apiConsumerTenants)) {
 				next(createError(404, 'Unknown "client" id "' + context.req.params.fk + '".', 'MODEL_NOT_FOUND'));
-				return;	
+				return;
 			}
 
 			// Read Api to check authorization
-			Api.findById(context.req.params.id, { fields: {tenantId: true, audience: true} }, function(err, api) {
+			Api.findById(context.req.params.id, { fields: {tenantId: true, audience: true, clientRegistrationWebhook: true} }, function(err, api) {
 				if (err) {
 					next(err);
 					return;
-				}				
+				}
 
 				// Not-Public APIs need further validation
 				if (api.audience.length != 0) {
-					
+
 					// Check that at least one audience of the api is in the apiConsumerRoles
 					if (!context.req.user.isAdmin && !checkAudience(api.audience, context.req.user.apiConsumerTenants)) {
 						next(createError(404, 'could not find a model with id ' + context.req.params.id, 'MODEL_NOT_FOUND'));
@@ -311,16 +311,29 @@ module.exports = function(Api) {
 
 				context.req.body.createdBy = context.req.user.sub;
 				context.req.body.updatedBy = context.req.user.sub;
+				context.temp = {};
+				context.temp.clientRegistrationWebhook = api.clientRegistrationWebhook;
 				next();
 			});
 
-		});	
+		});
 
+	});
+
+	// PUT /apis/{id}/clients/rel/{clientId}
+	Api.afterRemote('prototype.__link__clients', function(context, response, next) {
+
+		// Call clientRegistrationWebhook if existing...
+		if (context.temp.clientRegistrationWebhook) {
+			
+
+		}
+		next();
 	});
 
 	// DELETE /apis/{id}/clients/rel/{clientId}
 	Api.beforeRemote('prototype.__unlink__clients', function(context, unused, next) {
-		
+
 		// Check if client exists (seems to be a bug in strongloop that this is not checked out-of-the-box)
 		Api.app.models.Client.findById(context.req.params.fk, function(err, client) {
 			if (err) {
@@ -332,21 +345,21 @@ module.exports = function(Api) {
 
 			if (!client) {
 				next(createError(404, 'Unknown "client" id "' + context.req.params.fk + '".', 'MODEL_NOT_FOUND'));
-				return;	
+				return;
 			}
 
 			// If the client has a tenantId it must match one of apiConsumerTenants
 			// If the client has no tenantId the createdBy user must match the current user
-			if (!context.req.user.isAdmin && 
-				((client.tenantId && !isTenantInArray(client.tenantId, context.req.user.apiConsumerTenants)) || 
+			if (!context.req.user.isAdmin &&
+				((client.tenantId && !isTenantInArray(client.tenantId, context.req.user.apiConsumerTenants)) ||
 				(!client.tenantId && client.createdBy != context.req.user.sub))) {
 				next(createError(404, 'Unknown "client" id "' + context.req.params.fk + '".', 'MODEL_NOT_FOUND'));
-				return;	
+				return;
 			}
 
 			next();
 
-		});	
+		});
 	});
 
 	/**************************
@@ -359,7 +372,7 @@ module.exports = function(Api) {
 			if (tenants[i] == tenantId) {
 				isOk = true;
 				break;
-			} 
+			}
 		}
 		return isOk;
 	}

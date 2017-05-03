@@ -149,6 +149,7 @@ module.exports = function(Client) {
 				next(createError(404, 'Unknown client id: ' + context.req.params.id, 'MODEL_NOT_FOUND'));
 				return;
 			}
+			console.log(client);
 			console.log("# apis:"+client.apis.length)
 			if (client.apis.length > 0) {
 				next(createError(409, 'This client is still registered by at least one API.', 'CONFLICT'));

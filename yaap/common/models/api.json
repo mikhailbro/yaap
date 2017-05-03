@@ -21,6 +21,10 @@
 			"type": "string",
 			"required": true
 		},
+    "contactEmail": {
+      "type": ["string"],
+      "required": true
+    },
 		"audience": {
 		 	"type": ["string"],
 		  	"description": "Array of tenant IDs. Is needed for authorization / visibility of APIs etc. No tenant means public!"
@@ -38,7 +42,7 @@
 		},
 		"clientRegistrationWebhook": {
 		  	"type": "object",
-		  	"description": "Webhook which is called when a new client registers to the API.",
+		  	"description": "Webhook which is called when a new client registers to this API.",
 		  	"required": false,
 		  	"properties": {
 		  		"url": {
@@ -62,7 +66,7 @@
 		  				}
 		  			}
 		  		}
-		  	}	
+		  	}
 		},
 		"updatedBy": {
 			"type": "string",

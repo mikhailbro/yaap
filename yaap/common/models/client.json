@@ -31,8 +31,8 @@
 			"type": "string",
 			"required": true
 		},
-		"contact": {
-			"type": "string",
+		"contactEmail": {
+			"type": ["string"],
 			"required": true
 		},
 		"x509CertificateChain": {
