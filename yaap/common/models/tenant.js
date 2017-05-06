@@ -13,7 +13,7 @@ module.exports = function(Tenant) {
 	Tenant.disableRemoteMethodByName('updateAll');					// POST		/tenants/update
 	Tenant.disableRemoteMethodByName('upsertWithWhere');			// POST		/tenants/upsertWithWhere
 
-	// Disable some relational functions 
+	// Disable some relational functions
 	Tenant.disableRemoteMethodByName('prototype.__create__apis');		// POST		/tenants/:id/apis
 	Tenant.disableRemoteMethodByName('prototype.__findById__apis');		// GET		/tenants/:id/apis/:apiId
 	Tenant.disableRemoteMethodByName('prototype.__updateById__apis');	// PUT		/tenants/:id/apis/:apiId
@@ -21,30 +21,16 @@ module.exports = function(Tenant) {
 
 	// all operations
 	Tenant.beforeRemote('**', function(context, unused, next) {
-	    if (context.req.user.isAdmin) {
+	    if (context.req.user.isAdmin || context.req.method == "GET") {
 	    	context.req.body.updatedBy = context.req.user.sub;
-			context.req.body.createdBy = context.req.user.sub;
+				context.req.body.createdBy = context.req.user.sub;
 	    	next();
 	    } else {
 	    	var error = new Error();
-			error.status = 400;
-			error.message = 'You must be admin for this operation.';
-			error.code = 'AUTHORIZATION_FAILED';
-			next(error);
-	    }
-	});
-
-	Tenant.beforeRemote('create', function(context, unused, next) {
-	    if (context.req.user.isAdmin) {
-	    	context.req.body.updatedBy = context.req.user.sub;
-			context.req.body.createdBy = context.req.user.sub;
-	    	next();
-	    } else {
-	    	var error = new Error();
-			error.status = 400;
-			error.message = 'You must be admin for this operation.';
-			error.code = 'AUTHORIZATION_FAILED';
-			next(error);
+				error.status = 400;
+				error.message = 'You must be admin for this operation.';
+				error.code = 'AUTHORIZATION_FAILED';
+				next(error);
 	    }
 	});
 

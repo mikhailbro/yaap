@@ -1,6 +1,32 @@
 'use strict';
 
 module.exports = function(Api) {
+	var request = require('request'); // Request module for sending client registration webhook requests
+
+	Api.webhookListener = function(data, req, cb) {
+		//console.log(req.headers);
+		//console.log(data);
+    var response = 'OK';
+
+    cb(null, response);
+  };
+  Api.remoteMethod(
+    'webhookListener', {
+			accepts: [
+				{ arg: 'data', type: 'object', http: { source: 'body' } },
+				{arg: 'req', type: 'object', 'http': {source: 'req'}}
+			],
+			http: {
+        path: '/webhookListener',
+        verb: 'post'
+      },
+      returns: {
+        arg: 'status',
+        type: 'string'
+      }
+    }
+  );
+
 
 	/**************************
 	*	Disable REST functions
@@ -37,7 +63,6 @@ module.exports = function(Api) {
 	/**************************
 	*	Remote Hooks
 	***************************/
-
 	// Replace $ref in swagger because it's a reserved keyword in mongodb :-(
 	Api.beforeRemote('**', function(context, unused, next) {
 		if (context.req.body.swagger) {
@@ -269,7 +294,7 @@ module.exports = function(Api) {
 		// Note: Api must exist, this is checked by loopback when calling /apis/{id}/...
 
     // Check if client exists (seems to be a bug in strongloop that this is not checked out-of-the-box)
-		Api.app.models.Client.findById(context.req.params.fk, function(err, client) {
+		Api.app.models.Client.findById(context.req.params.fk, { fields: {secret: false} }, function(err, client) {
 			if (err) {
 				next(err);
 				return;
@@ -287,7 +312,7 @@ module.exports = function(Api) {
 			}
 
 			// Read Api to check authorization
-			Api.findById(context.req.params.id, { fields: {tenantId: true, audience: true, clientRegistrationWebhook: true} }, function(err, api) {
+			Api.findById(context.req.params.id, { fields: {swagger: false} }, function(err, api) {
 				if (err) {
 					next(err);
 					return;
@@ -311,8 +336,11 @@ module.exports = function(Api) {
 
 				context.req.body.createdBy = context.req.user.sub;
 				context.req.body.updatedBy = context.req.user.sub;
-				context.temp = {};
-				context.temp.clientRegistrationWebhook = api.clientRegistrationWebhook;
+				context.temp = {
+					"clientRegistrationWebhook": api.clientRegistrationWebhook,
+					"api": api,
+					"client": client
+				};
 				next();
 			});
 
@@ -323,12 +351,29 @@ module.exports = function(Api) {
 	// PUT /apis/{id}/clients/rel/{clientId}
 	Api.afterRemote('prototype.__link__clients', function(context, response, next) {
 
-		// Call clientRegistrationWebhook if existing...
+		// Call clientRegistrationWebhooks if existing...
 		if (context.temp.clientRegistrationWebhook) {
-			
-
+			var url = context.temp.clientRegistrationWebhook.url;
+			var requestBody = {"api": context.temp.api, "client": context.temp.client};
+			for (var i = 0; i < url.length; i++) {
+				var options  = {
+					url: url[i],
+					json: true,
+					body: requestBody,
+					headers: {}
+				};
+				options.headers[context.temp.clientRegistrationWebhook.securityToken.httpHeader] = context.temp.clientRegistrationWebhook.securityToken.token;
+				request.post(options, function(error, response, body) {
+					if (error || response.statusCode != 200) {
+						console.log("ERROR");
+						console.log(error);
+						console.log("STATUS CODE");
+						console.log(response.statusCode);
+					}
+				});
+			}
 		}
-		next();
+		next(); // Webhooks are sent asynchronous to not block the response
 	});
 
 	// DELETE /apis/{id}/clients/rel/{clientId}
