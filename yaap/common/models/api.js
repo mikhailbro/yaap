@@ -29,7 +29,7 @@ module.exports = function(Api) {
 
 
 	/**************************
-	*	Disable REST functionss
+	*	Disable REST functions
 	***************************/
 	// Disable some functions via REST API according to http://loopback.io/doc/en/lb3/Exposing-models-over-REST.html
 	Api.disableRemoteMethodByName('exists'); 					// GET		/apis/:id/exists
