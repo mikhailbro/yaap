@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = function(Client) {
-	
+
 	/**************************
 	*	Disable REST functions
 	***************************/
@@ -32,12 +32,12 @@ module.exports = function(Client) {
 	*	Validation Checks
 	***************************/
 	Client.validatesInclusionOf('type', {in: ['public', 'confidential']});
-	
+
 
 	/**************************
 	*	Remote Hooks
 	***************************/
-	
+
 	// **************************************************
 	// POST /clients
 	// **************************************************
@@ -55,11 +55,11 @@ module.exports = function(Client) {
 				if (err || tenant.length <= 0) {
 					next(createError(404, 'Client tenant does not exist.', 'NOT_FOUND'));
 					return;
-				} 
+				}
 	  		});
 		}
   		// *** END check the correctness of the tenantId entry ***
-  		
+
   		// Validate x509CertificateChain (optional)
   		if (context.req.body.x509CertificateChain) {
   			if (context.req.body.x509CertificateChain.length < 2) {
@@ -83,20 +83,20 @@ module.exports = function(Client) {
 					return;
 				}
 			}
-	    } 
+	    }
 		// *** END authorization ***
-		
+
 		next();
 	});
-	
-	
+
+
 	// **************************************************
 	// PUT /clients/{id} and POST /clients/{id}/replace
 	// **************************************************
 	Client.beforeRemote('replaceById', function(context, unused, next) {
-		 
+
 		context.req.body.updatedBy = context.req.user.sub;
-	
+
 		// *** BEGIN authorization ***
 		if (!context.req.user.isAdmin) {
 	    	// Check that the filled tenantId from request body matches one of tenants from apiConsumer role from token
@@ -110,10 +110,10 @@ module.exports = function(Client) {
 			if (context.req.user.sub != context.req.body.createdBy) {
 				next(createError(403, 'No permissions for this action. You must be creator of this client entry.', 'FORBIDDEN'));
 				return;
-			} 
-	    } 
+			}
+	    }
 		// *** END authorization ***
-		
+
 		// *** BEGIN reading the existing client byId and complete the input  ***
 		Client.findById(context.req.params.id, { fields: {name: true, contact: true, tenantId: true, createdBy: true, createdAt: true} }, function(err, client) {
 			if (err) {
@@ -131,14 +131,14 @@ module.exports = function(Client) {
 
 	});
 
-	
+
 	// **************************************************
 	// DELETE /clients/{id}
 	// **************************************************
 	Client.beforeRemote('deleteById', function(context, unused, next) {
 		var creator = "";
 		var tenant = "";
-		
+
 		// *** BEGIN reading the existing client byId including check of api relations ***
 		Client.findById(context.req.params.id, {include: 'apis'}, function(err, client) {
 			if (err) {
@@ -149,41 +149,40 @@ module.exports = function(Client) {
 				next(createError(404, 'Unknown client id: ' + context.req.params.id, 'MODEL_NOT_FOUND'));
 				return;
 			}
-			console.log(client);
-			console.log("# apis:"+client.apis.length)
-			if (client.apis.length > 0) {
+			var c = client.toJSON(); // http://loopback.io/doc/en/lb3/Include-filter.html#access-included-objects
+			if (c.apis.length > 0) {
 				next(createError(409, 'This client is still registered by at least one API.', 'CONFLICT'));
 				return;
 			} else {
 				creator = client.createdBy;
 				tenant = client.tenantId;
-				  		
+
 				// *** BEGIN authorization ***
 				if (!context.req.user.isAdmin) {
-			    	// Check that the filled tenantId from request body matches one of tenants from apiConsumer role from token
+			    // Check that the tenantId of the client matches one of tenants from apiConsumer role from token
 					if (tenant.length > 0 ) {
 						if (!isTenantInArray(tenant, context.req.user.apiConsumerTenants)) {
 							next(createError(403, 'Wrong permissions for this tenant.', 'FORBIDDEN'));
 							return;
-						} 
+						}
 						// Check that the subject is the same person, which has created this client:
 					} else if (context.req.user.sub != creator) {
 						next(createError(403, 'No permissions for this action. You must be creator of this client entry.', 'FORBIDDEN'));
 						return;
-					} 
-			    } 
+					}
+			    }
 				// *** END authorization ***
 			}
 
 			next();
-			
+
 		});
 		// *** END reading the existing client byId including check of api relations ***
-		
-		
-	});	
-	
-	
+
+
+	});
+
+
 	// **************************************************
 	// GET /clients
 	// **************************************************
@@ -193,22 +192,22 @@ module.exports = function(Client) {
 	    } else {
 	    	if (!context.args.filter || !context.args.filter.where) {
 		    	// No 'where' filter in request, add where clause to check audience
-				
+
 				if (!context.args.filter) {
 					context.args.filter = {};
 				}
 		    	context.args.filter.where = { or:	[
-		    											{ tenantId: { inq: context.req.user.apiConsumerTenants }}, 
+		    											{ tenantId: { inq: context.req.user.apiConsumerTenants }},
 		    											{ createdBy: context.req.user.sub }
-		    										] 
+		    										]
 		    								};
 		    } else {
 		    	// 'where' clause in request, add AND clause to check audience
 		    	context.args.filter.where = { and:	[
 					    								{ or:	[
-					    											{ tenantId: { inq: context.req.user.apiConsumerTenants }}, 
+					    											{ tenantId: { inq: context.req.user.apiConsumerTenants }},
 					    											{ createdBy: context.req.user.sub }
-					    										] 
+					    										]
 					    								},
 				    									context.args.filter.where
 				   									]
@@ -216,11 +215,11 @@ module.exports = function(Client) {
 		    }
 			console.log(context.args.filter.where);
 			next();
-	    }  
-	    
-	});	
-	 
-	 
+	    }
+
+	});
+
+
 	// **************************************************
 	// GET /clients/{id} - use afterRemote() as no where clause can be set with findById in beforeRemote()
 	// **************************************************
@@ -233,15 +232,15 @@ module.exports = function(Client) {
 				next(createError(403, 'No permissions for this action. Forbidden tenantId.', 'FORBIDDEN'));
 				return;
 			}
-			
+
 			// Check, if tenantId from response body is empty, weither the subject is the same person, which has created this client
 			if (response.tenantId.length == 0 || !response.tenantId) {
 				if (context.req.user.sub != response.createdBy) {
 					next(createError(403, 'No permissions for this action. You must be creator of this client entry.', 'FORBIDDEN'));
 					return;
-				} 
-			} 
-			
+				}
+			}
+
 			if (!response) {
 				next(createError(404, 'Unknown "client" id "' + response.id + '".', 'MODEL_NOT_FOUND'));
 				return;
@@ -249,9 +248,9 @@ module.exports = function(Client) {
 				next();
 			}
 		}
-		
+
 	});
-	 
+
 
 	// **************************************************
 	// GET /clients/{id}/apis
@@ -266,21 +265,21 @@ module.exports = function(Client) {
 					next(err);
 					return;
 				}
-				
+
 				// Check that the tenantId from the client matches one of tenants from apiConsumer role from token
 				if (!isTenantInArray(client.tenantId, context.req.user.apiConsumerTenants)) {
 					next(createError(403, 'No permissions for this action. Forbidden tenantId.', 'FORBIDDEN'));
 					return;
 				}
-				
+
 				// Check, if tenantId of the client is empty, weither the subject is the same person, which has created this client
 				if (client.tenantId.length == 0 || !client.tenantId) {
 					if (context.req.user.sub != client.createdBy) {
 						next(createError(403, 'No permissions for this action. You must be creator of this client entry', 'FORBIDDEN'));
 						return;
-					} 
-				} 
-			
+					}
+				}
+
 				if (!client) {
 					next(createError(404, 'Unknown "client" id "' + client.id + '".', 'MODEL_NOT_FOUND'));
 					return;
@@ -290,9 +289,9 @@ module.exports = function(Client) {
 
 			});
 	    }
-	});	 
-	
-	
+	});
+
+
 	/**************************
 	*	Helper Functions
 	***************************/
@@ -302,7 +301,7 @@ module.exports = function(Client) {
 			if (tenants[i] == tenantId) {
 				isOk = true;
 				break;
-			} 
+			}
 		}
 		return isOk;
 	}

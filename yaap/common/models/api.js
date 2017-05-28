@@ -367,8 +367,10 @@ module.exports = function(Api) {
 					if (error || response.statusCode != 200) {
 						console.log("ERROR");
 						console.log(error);
-						console.log("STATUS CODE");
-						console.log(response.statusCode);
+						if (response) {
+							console.log("STATUS CODE");
+							console.log(response.statusCode);
+						}
 					}
 				});
 			}
