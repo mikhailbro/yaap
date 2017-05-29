@@ -56,7 +56,7 @@ module.exports = function(Client) {
 					next(createError(404, 'Client tenant does not exist.', 'NOT_FOUND'));
 					return;
 				}
-	  		});
+	  	});
 		}
   		// *** END check the correctness of the tenantId entry ***
 
@@ -99,19 +99,14 @@ module.exports = function(Client) {
 
 		// *** BEGIN authorization ***
 		if (!context.req.user.isAdmin) {
-	    	// Check that the filled tenantId from request body matches one of tenants from apiConsumer role from token
+	    // Check that the filled tenantId from request body matches one of tenants from apiConsumer role from token
 			if (context.req.body.tenantId && context.req.body.tenantId.length > 0 ) {
 				if (!isTenantInArray(context.req.body.tenantId, context.req.user.apiConsumerTenants)) {
 					next(createError(400, 'Wrong tenantId in request body.', 'BAD_REQUEST'));
 					return;
 				}
 			}
-			// Check that the subject is the same person, which has created this client:
-			if (context.req.user.sub != context.req.body.createdBy) {
-				next(createError(403, 'No permissions for this action. You must be creator of this client entry.', 'FORBIDDEN'));
-				return;
-			}
-	    }
+	  }
 		// *** END authorization ***
 
 		// *** BEGIN reading the existing client byId and complete the input  ***
@@ -125,6 +120,12 @@ module.exports = function(Client) {
 				return;
 			}
 
+			// Check that the subject is the same person, which has created this client:
+			if (!client.tenantId && context.req.user.sub != client.createdBy) {
+				next(createError(403, 'No permissions for this action. You must be creator of this client entry.', 'FORBIDDEN'));
+				return;
+			}
+			context.req.body.createdBy = client.createdBy;
 			next();
 		});
 		// *** END reading the existing client byId and complete the input ***
@@ -190,31 +191,30 @@ module.exports = function(Client) {
 	    if (context.req.user.isAdmin) {
 	    	next();
 	    } else {
-	    	if (!context.args.filter || !context.args.filter.where) {
+				if (!context.args.filter || !context.args.filter.where) {
 		    	// No 'where' filter in request, add where clause to check audience
-
-				if (!context.args.filter) {
-					context.args.filter = {};
-				}
-		    	context.args.filter.where = { or:	[
-		    											{ tenantId: { inq: context.req.user.apiConsumerTenants }},
-		    											{ createdBy: context.req.user.sub }
-		    										]
-		    								};
+					if (!context.args.filter) {
+						context.args.filter = {};
+					}
+		    	context.args.filter.where = { or:
+						[
+		    			{ tenantId: { inq: context.req.user.apiConsumerTenants }},
+		    			{ createdBy: context.req.user.sub }
+		    		]
+		    	};
 		    } else {
-		    	// 'where' clause in request, add AND clause to check audience
-		    	context.args.filter.where = { and:	[
-					    								{ or:	[
-					    											{ tenantId: { inq: context.req.user.apiConsumerTenants }},
-					    											{ createdBy: context.req.user.sub }
-					    										]
-					    								},
-				    									context.args.filter.where
-				   									]
-											};
+		    	// 'where' clause in request, add AND clause to check consumerTenants
+		    	context.args.filter.where = { and: [
+							{ or:	[
+					    		{ tenantId: { inq: context.req.user.apiConsumerTenants }},
+					    		{ createdBy: context.req.user.sub }
+					    	]
+					    },
+				    	context.args.filter.where
+				   	]
+					};
 		    }
-			console.log(context.args.filter.where);
-			next();
+				next();
 	    }
 
 	});

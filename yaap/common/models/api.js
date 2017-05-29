@@ -3,31 +3,6 @@
 module.exports = function(Api) {
 	var request = require('request'); // Request module for sending client registration webhook requests
 
-	Api.webhookListener = function(data, req, cb) {
-		//console.log(req.headers);
-		//console.log(data);
-    var response = 'OK';
-
-    cb(null, response);
-  };
-  Api.remoteMethod(
-    'webhookListener', {
-			accepts: [
-				{ arg: 'data', type: 'object', http: { source: 'body' } },
-				{arg: 'req', type: 'object', 'http': {source: 'req'}}
-			],
-			http: {
-        path: '/webhookListener',
-        verb: 'post'
-      },
-      returns: {
-        arg: 'status',
-        type: 'string'
-      }
-    }
-  );
-
-
 	/**************************
 	*	Disable REST functions
 	***************************/
@@ -58,6 +33,7 @@ module.exports = function(Api) {
 	*	Validation Checks
 	***************************/
 	Api.validatesInclusionOf('state', {in: ['enabled', 'disabled', 'deprecated']});
+	//Api.validatesInclusionOf('authorizationMethods', {in: ['apikey', 'oauth']});
 
 
 	/**************************
@@ -141,28 +117,37 @@ module.exports = function(Api) {
 
 		// Authorization
 		if (!context.req.user.isAdmin) {
-	    	// Check that tenantId from body (api) matches one tenant from apiOwner Role from token
+	    // Check that tenantId from body (api) matches one tenant from apiOwner Role from token
 			if (!isTenantInArray(context.req.body.tenantId, context.req.user.apiOwnerTenants)) {
 				next(createError(400, 'Wrong tenantId in request body.', 'BAD_REQUEST'));
 				return;
 			}
-	    }
+		}
 
-	    // Input validation
-	    if (context.req.body.clientRegistrationWebhook) {
-	    	if (!context.req.body.clientRegistrationWebhook.url || !context.req.body.clientRegistrationWebhook.url.length > 0) {
-	    		next(createError(400, 'Attribut url within clientRegistrationWebhook must exist.', 'BAD_REQUEST'));
+	 	// Input validation
+	  if (context.req.body.clientRegistrationWebhook) {
+	  	if (!context.req.body.clientRegistrationWebhook.url || !context.req.body.clientRegistrationWebhook.url.length > 0) {
+	    	next(createError(400, 'Attribut url within clientRegistrationWebhook must exist.', 'BAD_REQUEST'));
 				return;
-	    	}
-	    	if (context.req.body.clientRegistrationWebhook.securityToken && !context.req.body.clientRegistrationWebhook.securityToken.httpHeader) {
-	    		next(createError(400, 'Attribut httpHeader within clientRegistrationWebhook.securityToken must exist.', 'BAD_REQUEST'));
-				return;
-	    	}
-	    	if (context.req.body.clientRegistrationWebhook.securityToken && !context.req.body.clientRegistrationWebhook.securityToken.token) {
-	    		next(createError(400, 'Attribut token within clientRegistrationWebhook.securityToken must exist.', 'BAD_REQUEST'));
-				return;
-	    	}
 	    }
+	    if (context.req.body.clientRegistrationWebhook.securityToken && !context.req.body.clientRegistrationWebhook.securityToken.httpHeader) {
+	    	next(createError(400, 'Attribut httpHeader within clientRegistrationWebhook.securityToken must exist.', 'BAD_REQUEST'));
+				return;
+	    }
+	    if (context.req.body.clientRegistrationWebhook.securityToken && !context.req.body.clientRegistrationWebhook.securityToken.token) {
+	    	next(createError(400, 'Attribut token within clientRegistrationWebhook.securityToken must exist.', 'BAD_REQUEST'));
+				return;
+	    }
+	 	}
+		if (context.req.body.authorizationMethods) {
+			for (var i = 0; i < context.req.body.authorizationMethods.length; i++) {
+				if (context.req.body.authorizationMethods[i] != "apikey" && context.req.body.authorizationMethods[i] != "oauth") {
+					next(createError(422, 'The \'Api\' instance is not valid. Details: \'authorizationMethods\' must be one of: apikey, oauth', 'ValidationError'));
+					return;
+				}
+			}
+		}
+
 
 		// Check if all audiences exist as tenants
 		if (!context.req.body.audience) {
@@ -177,7 +162,7 @@ module.exports = function(Api) {
 				context.req.body.createdBy = context.req.user.sub;
 				next();
 			}
-  		});
+  	});
 
 	});
 
@@ -204,20 +189,29 @@ module.exports = function(Api) {
 			}
 
 			// Input validation
-		    if (context.req.body.clientRegistrationWebhook) {
-		    	if (!context.req.body.clientRegistrationWebhook.url || !context.req.body.clientRegistrationWebhook.url.length > 0) {
-		    		next(createError(400, 'Attribut url within clientRegistrationWebhook must exist.', 'BAD_REQUEST'));
-					return;
-		    	}
-		    	if (context.req.body.clientRegistrationWebhook.securityToken && !context.req.body.clientRegistrationWebhook.securityToken.httpHeader) {
-		    		next(createError(400, 'Attribut httpHeader within clientRegistrationWebhook.securityToken must exist.', 'BAD_REQUEST'));
-					return;
-		    	}
-		    	if (context.req.body.clientRegistrationWebhook.securityToken && !context.req.body.clientRegistrationWebhook.securityToken.token) {
-		    		next(createError(400, 'Attribut token within clientRegistrationWebhook.securityToken must exist.', 'BAD_REQUEST'));
-					return;
-		    	}
+		  if (context.req.body.clientRegistrationWebhook) {
+		    if (!context.req.body.clientRegistrationWebhook.url || !context.req.body.clientRegistrationWebhook.url.length > 0) {
+		    	next(createError(400, 'Attribut url within clientRegistrationWebhook must exist.', 'BAD_REQUEST'));
+				return;
 		    }
+		    if (context.req.body.clientRegistrationWebhook.securityToken && !context.req.body.clientRegistrationWebhook.securityToken.httpHeader) {
+		    	next(createError(400, 'Attribut httpHeader within clientRegistrationWebhook.securityToken must exist.', 'BAD_REQUEST'));
+				return;
+		    }
+		    if (context.req.body.clientRegistrationWebhook.securityToken && !context.req.body.clientRegistrationWebhook.securityToken.token) {
+		    	next(createError(400, 'Attribut token within clientRegistrationWebhook.securityToken must exist.', 'BAD_REQUEST'));
+					return;
+		    }
+		   }
+			if (context.req.body.authorizationMethods) {
+				for (var i = 0; i < context.req.body.authorizationMethods.length; i++) {
+					if (context.req.body.authorizationMethods[i] != "apikey" && context.req.body.authorizationMethods[i] != "oauth") {
+						next(createError(422, 'The \'Api\' instance is not valid. Details: \'authorizationMethods\' must be one of: apikey, oauth', 'ValidationError'));
+						return;
+					}
+				}
+			}
+
 
 			// Check if all audiences exists as tenants
 			if (!context.req.body.audience) {

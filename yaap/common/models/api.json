@@ -40,6 +40,11 @@
 		  	"enum": ["enabled", "disabled", "deprecated"],
 		  	"default": "enabled"
 		},
+    "authorizationMethods": {
+      "type": ["string"],
+      "required": true,
+      "enum": ["apikey", "oauth"]
+    },
 		"clientRegistrationWebhook": {
 		  	"type": "object",
 		  	"description": "Webhook which is called when a new client registers to this API.",
