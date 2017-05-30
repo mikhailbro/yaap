@@ -22,6 +22,11 @@
 			"required": false,
 			"defaultFn": "uuidv4"
 		},
+		"clientId": {
+			"type": "string",
+			"required": false,
+			"defaultFn": "uuidv4"
+		},
 		"type": {
 			"type": "string",
 			"required": true,
