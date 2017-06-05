@@ -8,5 +8,9 @@
     "name": "mongodb",
     "user": "",
     "connector": "mongodb"
+  },
+  "certstore": {
+    "name": "db",
+    "connector": "memory"
   }
 }

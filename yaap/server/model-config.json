@@ -29,5 +29,9 @@
   "ClientRegistration": {
     "dataSource": "mongodb",
     "public": false
+  },
+  "Cert": {
+    "dataSource": "certstore",
+    "public": false
   }
 }

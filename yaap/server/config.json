@@ -18,5 +18,8 @@
       "limit": "100kb"
     },
     "cors": false
+  },
+  "oauth": {
+    "jwksUrl": "https://dev-181849.oktapreview.com/oauth2/ausap5s51xAMJ2j2X0h7/v1/keys"
   }
 }
