@@ -22,7 +22,8 @@ module.exports = function() {
               var oauthConfig = req.app.get("oauth"); // Read url from config.js
               getJwkFromAs(oauthConfig, function(err, response){
                 if (err) {next(err)} else {
-                  console.log(jwk);
+                  console.log(response)
+                  console.log(response.body);
                   var jwk = response.body.keys.find(function(currentValue, index, arr){
                     return kid == currentValue.kid; // Read jwk from array which matches to our kid
                   });
