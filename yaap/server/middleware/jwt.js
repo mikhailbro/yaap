@@ -22,12 +22,13 @@ module.exports = function() {
               var oauthConfig = req.app.get("oauth"); // Read url from config.js
               getJwkFromAs(oauthConfig, function(err, response){
                 if (err) {next(err)} else {
-                  console.log(response)
-                  console.log(response.body);
                   var jwk = response.body.keys.find(function(currentValue, index, arr){
                     return kid == currentValue.kid; // Read jwk from array which matches to our kid
                   });
-
+                  if (!jwk) {
+                    res.status(400).send({error: 'authorization failed', detail: 'invalid access token - kid attribute invalid'});
+                    return;
+                  }
                   var pem = jwkToPem(jwk); // Convert jwk to pem
                   var certInstance = {"kid": kid, "cert": pem};
                   Cert.create(certInstance, function(err, cert){
