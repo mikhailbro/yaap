@@ -38,7 +38,7 @@ module.exports = function() {
                           res.status(400).send({error: 'authorization failed', detail: 'invalid access token'});
                           next(err);
                         } else {
-                          console.log("HERE: Cert was not existing, fetched from okta")
+                          console.log(req.user)
                           next();
                         }
                       });
@@ -58,7 +58,7 @@ module.exports = function() {
                   res.status(400).send({error: 'authorization failed', detail: 'invalid access token'});
                   next(err)
                 } else {
-                  console.log("HERE: Cert was existing")
+                  console.log(req.user)
                   next();
                 }
               });
