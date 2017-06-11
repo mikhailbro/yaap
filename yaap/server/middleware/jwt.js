@@ -38,7 +38,6 @@ module.exports = function() {
                           res.status(400).send({error: 'authorization failed', detail: 'invalid access token'});
                           next(err);
                         } else {
-                          console.log(req.user)
                           next();
                         }
                       });
@@ -58,7 +57,6 @@ module.exports = function() {
                   res.status(400).send({error: 'authorization failed', detail: 'invalid access token'});
                   next(err)
                 } else {
-                  console.log(req.user)
                   next();
                 }
               });
