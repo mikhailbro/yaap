@@ -38,6 +38,7 @@ module.exports = function() {
                           res.status(400).send({error: 'authorization failed', detail: 'invalid access token'});
                           next(err);
                         } else {
+                          console.log("HERE: Cert was not existing, fetched from okta")
                           next();
                         }
                       });
@@ -57,6 +58,7 @@ module.exports = function() {
                   res.status(400).send({error: 'authorization failed', detail: 'invalid access token'});
                   next(err)
                 } else {
+                  console.log("HERE: Cert was existing")
                   next();
                 }
               });
@@ -123,7 +125,6 @@ module.exports = function() {
         var Tenant = req.app.models.Tenant;
 
         // 	Find all tenants with the api-owner roles from the token
-        console.log(at_decoded)
         Tenant.find({where: {apiOwnerRole: {inq: at_decoded.yaapRoles}}}, function(err, tenants) {
           if (err) {
             console.log("ERROR");
