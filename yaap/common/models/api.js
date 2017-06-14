@@ -7,34 +7,33 @@ module.exports = function(Api) {
 	*	Disable REST functions
 	***************************/
 	// Disable some functions via REST API according to http://loopback.io/doc/en/lb3/Exposing-models-over-REST.html
-	Api.disableRemoteMethodByName('exists'); 					// GET		/apis/:id/exists
-	Api.disableRemoteMethodByName('findOne');					// GET		/apis/findOne
-	Api.disableRemoteMethodByName('count');						// GET 		/apis/count
-	Api.disableRemoteMethodByName('createChangeStream');		// POST		/apis/change-stream
-	Api.disableRemoteMethodByName('patchOrCreate');				// PATCH	/apis
-	Api.disableRemoteMethodByName('replaceOrCreate');			// PUT		/apis
-	Api.disableRemoteMethodByName('prototype.patchAttributes');	// PATCH	/apis/:id
-	Api.disableRemoteMethodByName('updateAll');					// POST		/apis/update
-	Api.disableRemoteMethodByName('upsertWithWhere');			// POST		/apis/upsertWithWhere
+	Api.disableRemoteMethodByName('exists'); 														// GET		/apis/:id/exists
+	Api.disableRemoteMethodByName('findOne');														// GET		/apis/findOne
+	Api.disableRemoteMethodByName('count');															// GET 		/apis/count
+	Api.disableRemoteMethodByName('createChangeStream');								// POST		/apis/change-stream
+	Api.disableRemoteMethodByName('patchOrCreate');											// PATCH	/apis
+	Api.disableRemoteMethodByName('replaceOrCreate');										// PUT		/apis
+	Api.disableRemoteMethodByName('prototype.patchAttributes');					// PATCH	/apis/:id
+	Api.disableRemoteMethodByName('updateAll');													// POST		/apis/update
+	Api.disableRemoteMethodByName('upsertWithWhere');										// POST		/apis/upsertWithWhere
 
 	// Disable some relational functions for tenants
-	Api.disableRemoteMethodByName('prototype.__get__tenant');			// GET 		/apis/:id/tenant
+	Api.disableRemoteMethodByName('prototype.__get__tenant');						// GET 		/apis/:id/tenant
 
 	// Disable some relational functions for clients
-	Api.disableRemoteMethodByName('prototype.__create__clients');		// POST		/apis/:id/clients
-	Api.disableRemoteMethodByName('prototype.__delete__clients');		// DELETE 	/apis/:id/clients
-	Api.disableRemoteMethodByName('prototype.__count__clients');		// GET 		/apis/:id/clients/count
-	Api.disableRemoteMethodByName('prototype.__findById__clients');		// GET		/apis/:id/clients/:clientId
-	Api.disableRemoteMethodByName('prototype.__updateById__clients');	// PUT		/apis/:id/clients/:clientId
+	Api.disableRemoteMethodByName('prototype.__create__clients');				// POST		/apis/:id/clients
+	Api.disableRemoteMethodByName('prototype.__delete__clients');				// DELETE /apis/:id/clients
+	Api.disableRemoteMethodByName('prototype.__count__clients');				// GET 		/apis/:id/clients/count
+	Api.disableRemoteMethodByName('prototype.__findById__clients');			// GET		/apis/:id/clients/:clientId
+	Api.disableRemoteMethodByName('prototype.__updateById__clients');		// PUT		/apis/:id/clients/:clientId
 	Api.disableRemoteMethodByName('prototype.__destroyById__clients');	// DELETE	/apis/:id/clients/:clientId
-	Api.disableRemoteMethodByName('prototype.__exists__clients');		// HEAD 	/apis/:id/clients/rel/:clientId
+	Api.disableRemoteMethodByName('prototype.__exists__clients');				// HEAD 	/apis/:id/clients/rel/:clientId
 
 	/**************************
 	*	Validation Checks
 	***************************/
 	Api.validatesInclusionOf('state', {in: ['enabled', 'disabled', 'deprecated']});
 	//Api.validatesInclusionOf('authorizationMethods', {in: ['apikey', 'oauth']});
-
 
 	/**************************
 	*	Remote Hooks
@@ -69,13 +68,15 @@ module.exports = function(Api) {
 		next();
 	});
 
-	// GET /apis
+	/********************
+	* GET /apis
+	********************/
 	Api.beforeRemote('find', function(context, unused, next) {
-	    if (context.req.user.isAdmin) {
-	    	next();
-	    } else {
-	    	if (!context.args.filter || !context.args.filter.where) {
-		    	// No 'where' filter in request, add where clause to check audience
+		if (context.req.user.isAdmin) {
+	    next();
+	 	} else {
+	  	if (!context.args.filter || !context.args.filter.where) {
+		  	// No 'where' filter in request, add where clause to check audience
 
 				if (!context.args.filter) {
 					context.args.filter = {};
@@ -88,15 +89,16 @@ module.exports = function(Api) {
 				    	{ or: [{ audience: { inq: context.req.user.apiConsumerTenants} }, { audience: [] }] },
 				    	context.args.filter.where
 				   	]
-				};
+					};
 		    }
-
 		    next();
 	    }
 
-	 });
+	});
 
-	// GET /apis/{id} - use afterRemote() as no where clause can be set with findById in beforeRemote()
+	/********************
+	* GET /apis/{id} - use afterRemote() as no where clause can be set with findById in beforeRemote()
+	********************/
 	Api.afterRemote('findById', function(context, response, next) {
 		if (!response || context.req.user.isAdmin) {
 			next();
@@ -105,157 +107,87 @@ module.exports = function(Api) {
 			if (checkAudience(response.audience, context.req.user.apiConsumerTenants) || response.audience.length == 0) {
 				next();
 			} else {
-				next(createError(404, 'Unknown "api" id "' + response.id + '".', 'MODEL_NOT_FOUND'));
-				return;
+				return next(createError(404, 'Unknown "api" id "' + response.id + '".', 'MODEL_NOT_FOUND'));
 			}
 		}
-
-	 });
-
-	// POST /apis
-	Api.beforeRemote('create', function(context, unused, next) {
-
-		// Authorization
-		if (!context.req.user.isAdmin) {
-	    // Check that tenantId from body (api) matches one tenant from apiOwner Role from token
-			if (!isTenantInArray(context.req.body.tenantId, context.req.user.apiOwnerTenants)) {
-				next(createError(400, 'Wrong tenantId in request body.', 'BAD_REQUEST'));
-				return;
-			}
-		}
-
-	 	// Input validation
-	  if (context.req.body.clientRegistrationWebhook) {
-	  	if (!context.req.body.clientRegistrationWebhook.url || !context.req.body.clientRegistrationWebhook.url.length > 0) {
-	    	next(createError(400, 'Attribut url within clientRegistrationWebhook must exist.', 'BAD_REQUEST'));
-				return;
-	    }
-	    if (context.req.body.clientRegistrationWebhook.securityToken && !context.req.body.clientRegistrationWebhook.securityToken.httpHeader) {
-	    	next(createError(400, 'Attribut httpHeader within clientRegistrationWebhook.securityToken must exist.', 'BAD_REQUEST'));
-				return;
-	    }
-	    if (context.req.body.clientRegistrationWebhook.securityToken && !context.req.body.clientRegistrationWebhook.securityToken.token) {
-	    	next(createError(400, 'Attribut token within clientRegistrationWebhook.securityToken must exist.', 'BAD_REQUEST'));
-				return;
-	    }
-	 	}
-		if (context.req.body.authorizationMethods) {
-			for (var i = 0; i < context.req.body.authorizationMethods.length; i++) {
-				if (context.req.body.authorizationMethods[i] != "apikey" && context.req.body.authorizationMethods[i] != "oauth") {
-					next(createError(422, 'The \'Api\' instance is not valid. Details: \'authorizationMethods\' must be one of: apikey, oauth', 'ValidationError'));
-					return;
-				}
-			}
-		}
-
-
-		// Check if all audiences exist as tenants
-		if (!context.req.body.audience) {
-			context.req.body.audience = [];
-		}
-		Api.app.models.Tenant.find({where: { id: { inq: context.req.body.audience}}}, function(err, tenants) {
-			if (err || tenants.length != context.req.body.audience.length) {
-				next(createError(400, 'Audience does not exist.', 'BAD_REQUEST'));
-				return;
-			} else {
-				context.req.body.updatedBy = context.req.user.sub;
-				context.req.body.createdBy = context.req.user.sub;
-				next();
-			}
-  	});
 
 	});
 
-	// PUT /apis/{id} and  POST /apis/{id}/replace
+	/********************
+	* POST /apis
+	********************/
+	Api.beforeRemote('create', function(context, unused, next) {
+
+		inputvalidationApi(context.req.body, context.req.user, Api.app.models.Tenant, function (err, data) {
+			if (err) return next(err);
+
+			// Complete body to be saved into database
+			context.req.body.updatedBy = context.req.user.sub;
+			context.req.body.createdBy = context.req.user.sub;
+
+			next();
+		})
+
+	});
+
+	/********************
+	* PUT /apis/{id}
+	* POST /apis/{id}/replace
+	********************/
 	Api.beforeRemote('replaceById', function(context, unused, next) {
 
-    	// Read Api first to check authorization
+  	// Read Api first to check authorization
 		Api.findById(context.req.params.id, { fields: {tenantId: true, createdBy: true} }, function(err, api) {
-			if (err) {
-				next(err);
-				return;
-			}
+			if (err) return next(err);
 
 			// Authorization: Is apiOwnerRole allowed to updated this api?
 			if (!context.req.user.isAdmin && !isTenantInArray(api.tenantId, context.req.user.apiOwnerTenants)) {
-				next(createError(404, 'Unknown "api" id "' + context.req.params.id + '".', 'MODEL_NOT_FOUND'));
-				return;
+				return next(createError(404, 'Unknown "api" id "' + context.req.params.id + '".', 'MODEL_NOT_FOUND'));
 			}
 
 			// tenantId cannot be updated
 			if (api.tenantId != context.req.body.tenantId) {
-				next(createError(400, 'Attribute "tenantId" cannot be updated.'), 'BAD_REQUEST');
-				return;
+				return next(createError(400, 'Attribute "tenantId" cannot be updated.'), 'BAD_REQUEST');
 			}
 
-			// Input validation
-		  if (context.req.body.clientRegistrationWebhook) {
-		    if (!context.req.body.clientRegistrationWebhook.url || !context.req.body.clientRegistrationWebhook.url.length > 0) {
-		    	next(createError(400, 'Attribut url within clientRegistrationWebhook must exist.', 'BAD_REQUEST'));
-				return;
-		    }
-		    if (context.req.body.clientRegistrationWebhook.securityToken && !context.req.body.clientRegistrationWebhook.securityToken.httpHeader) {
-		    	next(createError(400, 'Attribut httpHeader within clientRegistrationWebhook.securityToken must exist.', 'BAD_REQUEST'));
-				return;
-		    }
-		    if (context.req.body.clientRegistrationWebhook.securityToken && !context.req.body.clientRegistrationWebhook.securityToken.token) {
-		    	next(createError(400, 'Attribut token within clientRegistrationWebhook.securityToken must exist.', 'BAD_REQUEST'));
-					return;
-		    }
-		   }
-			if (context.req.body.authorizationMethods) {
-				for (var i = 0; i < context.req.body.authorizationMethods.length; i++) {
-					if (context.req.body.authorizationMethods[i] != "apikey" && context.req.body.authorizationMethods[i] != "oauth") {
-						next(createError(422, 'The \'Api\' instance is not valid. Details: \'authorizationMethods\' must be one of: apikey, oauth', 'ValidationError'));
-						return;
-					}
-				}
-			}
+			inputvalidationApi(context.req.body, context.req.user, Api.app.models.Tenant, function (err, data) {
+				if (err) return next(err);
 
+				// Complete body to be saved into database
+				context.req.body.updatedBy = context.req.user.sub;
+				context.req.body.createdBy = context.req.user.sub;
 
-			// Check if all audiences exists as tenants
-			if (!context.req.body.audience) {
-				context.req.body.audience = [];
-			}
-			Api.app.models.Tenant.find({where: { id: { inq: context.req.body.audience}}}, function(err, tenants) {
-				if (err || tenants.length != context.req.body.audience.length) {
-					next(createError(400, 'Audience does not exist.', 'BAD_REQUEST'));
-					return;
-				} else {
-					context.req.body.updatedBy = context.req.user.sub;
-					context.req.body.createdBy = api.createdBy;
-					next();
-				}
-	  		});
+				next();
+			})
 		});
 
 	});
 
-	// DELETE /apis/{id}
+	/********************
+	* DELETE /apis/{id}
+	********************/
 	Api.beforeRemote('deleteById', function(context, unused, next){
 		if (context.req.user.isAdmin) {
 	    	next();
 	    } else {
 	    	Api.findById(context.req.params.id, { fields: {tenantId: true} }, function(err, api) {
-				if (err) {
-					next(err);
-				}
+				if (err) return next(err);
 
 				// Check if apiOwnerRole is ok to delete
 				if (api && isTenantInArray(api.tenantId, context.req.user.apiOwnerTenants)) {
 					next();
 				} else {
-					next(createError(404, 'Unknown "api" id "' + context.req.params.id + '".', 'MODEL_NOT_FOUND'));
-					return;
+					return next(createError(404, 'Unknown "api" id "' + context.req.params.id + '".', 'MODEL_NOT_FOUND'));
 				}
 
 			});
-	    }
-
+		}
 
 	});
 
-	// GET /apis/{id}/clients
+	/********************
+	* GET /apis/{id}/clients
+	********************/
 	Api.beforeRemote('prototype.__get__clients', function(context, unused, next) {
 
 		if (context.req.user.isAdmin) {
@@ -263,68 +195,55 @@ module.exports = function(Api) {
 	    } else {
 	    	// Read Api first to check authorization
 			Api.findById(context.req.params.id, { fields: {tenantId: true} }, function(err, api) {
-				if (err) {
-					next(err);
-					return;
-				}
+				if (err) return next(err);
 
 				// Is apiOwnerRole allowed to read this api?
 				if (!isTenantInArray(api.tenantId, context.req.user.apiOwnerTenants)) {
-					next(createError(404, 'Unknown "api" id "' + context.req.params.id + '".', 'MODEL_NOT_FOUND'));
-					return;
+					return next(createError(404, 'Unknown "api" id "' + context.req.params.id + '".', 'MODEL_NOT_FOUND'));
 				} else {
 					next();
 				}
 
 			});
-	    }
-
+	 	}
 
 	});
 
-	// PUT /apis/{id}/clients/rel/{clientId}
+	/********************
+	* PUT /apis/{id}/clients/rel/{clientId} (beforeRemote)
+	********************/
 	Api.beforeRemote('prototype.__link__clients', function(context, unused, next) {
 
 		// Note: Api must exist, this is checked by loopback when calling /apis/{id}/...
 
     // Check if client exists (seems to be a bug in strongloop that this is not checked out-of-the-box)
 		Api.app.models.Client.findById(context.req.params.fk, { fields: {secret: false} }, function(err, client) {
-			if (err) {
-				next(err);
-				return;
-			}
+			if (err) return next(err);
 
 			if (!client) {
-				next(createError(404, 'Unknown "client" id "' + context.req.params.fk + '".', 'MODEL_NOT_FOUND'));
-				return;
+				return next(createError(404, 'Unknown "client" id "' + context.req.params.fk + '".', 'MODEL_NOT_FOUND'));
 			}
 
 			// If the client has a tenantId it must match one of apiConsumerTenants
 			if (!context.req.user.isAdmin && client.tenantId && !isTenantInArray(client.tenantId, context.req.user.apiConsumerTenants)) {
-				next(createError(404, 'Unknown "client" id "' + context.req.params.fk + '".', 'MODEL_NOT_FOUND'));
-				return;
+				return next(createError(404, 'Unknown "client" id "' + context.req.params.fk + '".', 'MODEL_NOT_FOUND'));
 			}
 
 			// Read Api to check authorization
 			Api.findById(context.req.params.id, { fields: {swagger: false} }, function(err, api) {
-				if (err) {
-					next(err);
-					return;
-				}
+				if (err) return next(err);
 
 				// Not-Public APIs need further validation
 				if (api.audience.length != 0) {
 
 					// Check that at least one audience of the api is in the apiConsumerRoles
 					if (!context.req.user.isAdmin && !checkAudience(api.audience, context.req.user.apiConsumerTenants)) {
-						next(createError(404, 'could not find a model with id ' + context.req.params.id, 'MODEL_NOT_FOUND'));
-						return;
+						return next(createError(404, 'could not find a model with id ' + context.req.params.id, 'MODEL_NOT_FOUND'));
 					}
 
 					// Check that at least one audience matches the tenantId of the client
 					if (!client.tenantId || !isTenantInArray(client.tenantId, api.audience)) {
-						next(createError(400, 'Client ' + context.req.params.fk + ' is not allowed to be registered to the API '+ context.req.params.id + '.', 'BAD_REQUEST'));
-						return;
+						return next(createError(400, 'Client ' + context.req.params.fk + ' is not allowed to be registered to the API '+ context.req.params.id + '.', 'BAD_REQUEST'));
 					}
 				}
 
@@ -342,7 +261,9 @@ module.exports = function(Api) {
 
 	});
 
-	// PUT /apis/{id}/clients/rel/{clientId}
+	/********************
+	* PUT /apis/{id}/clients/rel/{clientId} (afterRemote)
+	********************/
 	Api.afterRemote('prototype.__link__clients', function(context, response, next) {
 
 		// Call clientRegistrationWebhooks if existing...
@@ -372,21 +293,19 @@ module.exports = function(Api) {
 		next(); // Webhooks are sent asynchronous to not block the response
 	});
 
-	// DELETE /apis/{id}/clients/rel/{clientId}
+	/********************
+	* DELETE /apis/{id}/clients/rel/{clientId}
+	********************/
 	Api.beforeRemote('prototype.__unlink__clients', function(context, unused, next) {
 
 		// Check if client exists (seems to be a bug in strongloop that this is not checked out-of-the-box)
 		Api.app.models.Client.findById(context.req.params.fk, function(err, client) {
-			if (err) {
-				next(err);
-				return;
-			}
+			if (err) return next(err);
 
 			// Note: Api must exist, this is checked by loopback when calling /apis/{id}/...
 
 			if (!client) {
-				next(createError(404, 'Unknown "client" id "' + context.req.params.fk + '".', 'MODEL_NOT_FOUND'));
-				return;
+				return next(createError(404, 'Unknown "client" id "' + context.req.params.fk + '".', 'MODEL_NOT_FOUND'));
 			}
 
 			// If the client has a tenantId it must match one of apiConsumerTenants
@@ -394,8 +313,7 @@ module.exports = function(Api) {
 			if (!context.req.user.isAdmin &&
 				((client.tenantId && !isTenantInArray(client.tenantId, context.req.user.apiConsumerTenants)) ||
 				(!client.tenantId && client.createdBy != context.req.user.sub))) {
-				next(createError(404, 'Unknown "client" id "' + context.req.params.fk + '".', 'MODEL_NOT_FOUND'));
-				return;
+				return next(createError(404, 'Unknown "client" id "' + context.req.params.fk + '".', 'MODEL_NOT_FOUND'));
 			}
 
 			next();
@@ -436,6 +354,55 @@ module.exports = function(Api) {
 		error.message = message;
 		error.code = code;
 		return error;
+	}
+
+	function inputvalidationApi(body, user, Tenant, callback) {
+		// Verfiy that callback is a function
+		if (!(typeof (callback) === 'function')) {
+    	callback = function() {};  // If callback is not a fuction set it to neutral function
+  	}
+
+		// tenantId
+		if (!user.isAdmin) {
+			// Check that tenantId from body (api) matches one tenant from apiOwner Role from token
+			if (!isTenantInArray(body.tenantId, user.apiOwnerTenants)) {
+				return callback(createError(400, 'Wrong tenantId in request body.', 'BAD_REQUEST'));
+			}
+		}
+
+		// clientRegistrationWebhook
+		if (body.clientRegistrationWebhook) {
+	  	if (!body.clientRegistrationWebhook.url || !body.clientRegistrationWebhook.url.length > 0) {
+				return callback(createError(400, 'Attribut url within clientRegistrationWebhook must exist.', 'BAD_REQUEST'));
+	    }
+	    if (body.clientRegistrationWebhook.securityToken && !body.clientRegistrationWebhook.securityToken.httpHeader) {
+	    	return callback(createError(400, 'Attribut httpHeader within clientRegistrationWebhook.securityToken must exist.', 'BAD_REQUEST'));
+	    }
+	    if (body.clientRegistrationWebhook.securityToken && !body.clientRegistrationWebhook.securityToken.token) {
+	    	return callback(createError(400, 'Attribut token within clientRegistrationWebhook.securityToken must exist.', 'BAD_REQUEST'));
+	    }
+	 	}
+
+		// authorizationMethods
+		if (body.authorizationMethods) {
+			for (var i = 0; i < body.authorizationMethods.length; i++) {
+				if (body.authorizationMethods[i] != "apikey" && body.authorizationMethods[i] != "oauth") {
+					return callback(createError(422, 'The \'Api\' instance is not valid. Details: \'authorizationMethods\' must be one of: apikey, oauth', 'ValidationError'));
+				}
+			}
+		}
+
+		// Check if all audiences exist as tenants
+		if (!body.audience) {
+			body.audience = [];
+		}
+		Tenant.find({where: { id: { inq: body.audience}}}, function(err, tenants) {
+			if (err || tenants.length != body.audience.length) {
+				return callback(createError(400, 'Audience does not exist.', 'BAD_REQUEST'));
+			} else {
+				return callback(null, true);
+			}
+		});
 	}
 
 };
