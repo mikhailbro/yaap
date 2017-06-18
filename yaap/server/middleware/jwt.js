@@ -110,6 +110,7 @@ module.exports = function() {
     var jwt = require('jsonwebtoken');
     jwt.verify(at, pem, function(err, at_decoded) {
       if (err) {callback(err, null)} else {
+        req.user.isAuthenticated = true;
         // Set sub
         req.user.sub = at_decoded.sub;
 

@@ -362,7 +362,7 @@ module.exports = function(Api) {
     	callback = function() {};  // If callback is not a fuction set it to neutral function
   	}
 
-		// tenantId
+		// Authorization
 		if (!user.isAdmin) {
 			// Check that tenantId from body (api) matches one tenant from apiOwner Role from token
 			if (!isTenantInArray(body.tenantId, user.apiOwnerTenants)) {
