@@ -148,12 +148,16 @@ module.exports = function(Client) {
 					if (!context.args.filter) {
 						context.args.filter = {};
 					}
-		    	context.args.filter.where = { or:
-						[
-		    			{ tenantId: { inq: context.req.user.apiConsumerTenants }},
-		    			{ createdBy: context.req.user.sub }
-		    		]
-		    	};
+					if (context.req.user.sub) {
+						context.args.filter.where = { or:
+							[
+			    			{ tenantId: { inq: context.req.user.apiConsumerTenants }},
+			    			{ createdBy: context.req.user.sub }
+			    		]
+			    	};
+					} else {
+						context.args.filter.where = { tenantId: { inq: context.req.user.apiConsumerTenants }};
+					}
 		    } else {
 		    	// 'where' clause in request, add AND clause to check consumerTenants
 		    	context.args.filter.where = { and: [
@@ -179,23 +183,19 @@ module.exports = function(Client) {
 		if (!response || context.req.user.isAdmin) {
 			next();
 		} else {
-			// Check that the tenantId from response body matches one of tenants from apiConsumer role from token
-			if (!isTenantInArray(response.tenantId, context.req.user.apiConsumerTenants)) {
+			// If client belongst to a tenant, check that the tenantId from response body matches one of tenants from apiConsumer role from token
+			if (response.tenantId && !isTenantInArray(response.tenantId, context.req.user.apiConsumerTenants)) {
 				return next(createError(403, 'No permissions for this action. Forbidden tenantId.', 'FORBIDDEN'));
 			}
 
 			// Check, if tenantId from response body is empty, weither the subject is the same person, which has created this client
-			if (response.tenantId.length == 0 || !response.tenantId) {
+			if (!response.tenantId) {
 				if (context.req.user.sub != response.createdBy) {
-					return next(createError(403, 'No permissions for this action. You must be creator of this client entry.', 'FORBIDDEN'));
+					return next(createError(404, 'Unknown \"Client\" id \"' + response.id + '\".', 'FORBIDDEN'));
 				}
 			}
 
-			if (!response) {
-				return next(createError(404, 'Unknown "client" id "' + response.id + '".', 'MODEL_NOT_FOUND'));
-			} else {
-				next();
-			}
+			next();
 		}
 
 	});
